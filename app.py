@@ -23,6 +23,7 @@ html_template = """
     </form>
 
 <h1>Paso 2 : Carga el archivo Tasas.xlsx, Títulos de las 3 columnas:  F_Desde , F_Hasta_Inc. , Tasa </h1>
+ <p> Las fechas deben ser estar en el formato dd-mm-yyyy  y la tasa debe estar en tanto por uno </p>
     <form action="/upload_tasa" method="post" enctype="multipart/form-data">
         <input type="file" name="tasa_file" accept=".xlsx" required>
         <br><br>
@@ -31,6 +32,7 @@ html_template = """
 
 
  <h1>Paso 3 : Carga el archivo Deuda.xlsx , Títulos de las 3 columnas: Mes y Año , Fecha_Vto , Importe_Deuda</h1>
+ <p> Mes y Año debe estar en el formato mm-yyyy ,  Fecha_Vto en formato dd-mm-yyyy , la coma debe ser el separador decimal del Importe_Deuda </p>
     <form action="/process" method="post" enctype="multipart/form-data">
         <input type="file" name="excel_file" accept=".xlsx" required>
         <br><br>
