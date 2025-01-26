@@ -8,7 +8,7 @@ html_template = """
 <!DOCTYPE html>
 <html>
 <head>
-    <title> Web Aplicación para el Cálculo de los Intereses Compensatorios - Versión en Desarrollo </title>
+    <title> Web Aplicación para el Cálculo de los Intereses Compensatorios </title>
      <h1> Web Aplicación para el Cálculo de Intereses Compensatorios - Versión en Desarrollo desde el 26-01-2025</h1>
     <p> Utilizado:  HTML, Python, Flask, Pandas, GitHubPages, Render Web Hosting </p>
 </head>
