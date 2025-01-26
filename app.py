@@ -12,7 +12,7 @@ html_template = """
 </head>
 <body>
 
-    <h1>Ingresa la Fecha hasta cuando los intereses deben ser calculados</h1>
+    <h1>Paso 1 : Ingresa la Fecha hasta cuando los intereses deben ser calculados</h1>
     <form action="/set_date" method="post">
         <label for="calc_date">Fecha de Cálculo:</label>
         <input type="date" name="calc_date" required>
@@ -20,7 +20,7 @@ html_template = """
         <button type="submit">Establecer Fecha</button>
     </form>
 
-<h1>Carga el archivo Tasas.xlsx</h1>
+<h1>Paso 3 : Carga el archivo Tasas.xlsx</h1>
     <form action="/upload_tasa" method="post" enctype="multipart/form-data">
         <input type="file" name="tasa_file" accept=".xlsx" required>
         <br><br>
@@ -28,7 +28,7 @@ html_template = """
     </form>
 
 
- <h1>Carga el archivo Deuda.xlsx</h1>
+ <h1>Paso 3 : Carga el archivo Deuda.xlsx</h1>
     <form action="/process" method="post" enctype="multipart/form-data">
         <input type="file" name="excel_file" accept=".xlsx" required>
         <br><br>
