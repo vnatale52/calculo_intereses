@@ -21,7 +21,7 @@ html_template = """
         <button type="submit">Establecer Fecha</button>
     </form>
 
-<h1>Paso 3 : Carga el archivo Tasas.xlsx</h1>
+<h1>Paso 2 : Carga el archivo Tasas.xlsx</h1>
     <form action="/upload_tasa" method="post" enctype="multipart/form-data">
         <input type="file" name="tasa_file" accept=".xlsx" required>
         <br><br>
