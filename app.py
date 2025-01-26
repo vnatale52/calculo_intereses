@@ -30,7 +30,6 @@ html_template = """
         <button type="submit">Cargar Archivo</button>
     </form>
 
-
  <h1>Paso 3 : Carga el archivo Deuda.xlsx . Los Títulos de las 3 columnas deber ser : Mes y Año , Fecha_Vto , Importe_Deuda</h1>
  <p> Mes y Año debe estar en el formato mm-yyyy ,  Fecha_Vto en formato dd-mm-yyyy , la coma debe ser el separador decimal del Importe_Deuda </p>
     <form action="/process" method="post" enctype="multipart/form-data">
