@@ -8,7 +8,7 @@ html_template = """
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Aplicación de Cálculo</title>
+    <title>Web Applicación para el Cálculo de Intereses Compensatorios</title>
 </head>
 <body>
 
