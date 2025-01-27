@@ -14,7 +14,7 @@ html_template = """
 </head>
 <body>
 
-    <h1>Paso 1 : Ingresa la Fecha hasta cuando los intereses deben ser calculados</h1>
+    <h1>Paso 1 : Ingresa la Fecha (inclusive) hasta cuando los intereses deben ser calculados</h1>
     <form action="/set_date" method="post">
         <label for="calc_date">Fecha de Cálculo:</label>
         <input type="date" name="calc_date" required>
