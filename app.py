@@ -10,11 +10,11 @@ html_template = """
 <head>
     <title> Web Application para el Cálculo de los Intereses Compensatorios </title>
      <h1> Web Application para el Cálculo de los Intereses Compensatorios - Versión en Desarrollo desde el 26-01-2025, by VN </h1>
-    <p> Herramientas utilizadas:  HTML, Python (librerías Flask y Pandas), GitHubPages, Render Web Hosting y ChatGPT </p>
+    <p> Herramientas utilizadas:  HTML, Python (librerías Flask y Pandas), GitHubPages, Render Web Hosting y ChatGPT. </p>
 </head>
 <body>
 
-    <h1>Paso 1 : Ingresa la Fecha hasta la cual (inclusive) los intereses serán calculados</h1>
+    <h1>Paso 1 : Ingresa la Fecha hasta la cual (inclusive) los intereses serán calculados.</h1>
     <form action="/set_date" method="post">
         <label for="calc_date">Fecha de Cálculo:</label>
         <input type="date" name="calc_date" required>
@@ -23,15 +23,15 @@ html_template = """
     </form>
 
 <h1>Paso 2 : Carga el archivo Tasas.xlsx. Los Títulos de las 3 columnas deben ser :  F_Desde , F_Hasta_Inc. , Tasa </h1>
- <p> Las fechas deben estar en el formato dd-mm-yyyy  y la tasa nominal mensual debe estar expresada en tanto por uno, para 30 días de plazo; el denominador utilizado es siempre 30 días y no hay capitalización de intereses </p>
+ <p> Las fechas deben estar en el formato dd-mm-yyyy  y la tasa nominal mensual debe estar expresada en tanto por uno, para 30 días de plazo; el denominador utilizado es siempre 30 días y no hay capitalización de intereses. </p>
     <form action="/upload_tasa" method="post" enctype="multipart/form-data">
         <input type="file" name="tasa_file" accept=".xlsx" required>
         <br><br>
         <button type="submit">Cargar Archivo</button>
     </form>
 
- <h1>Paso 3 : Carga el archivo Deuda.xlsx . Los Títulos de las 3 columnas deben ser : Mes y Año , Fecha_Vto , Importe_Deuda</h1>
- <p> La columna "Mes y Año" debe estar en el formato mm-yyyy ,  "Fecha_Vto" en formato dd-mm-yyyy y la coma debe ser el separador decimal </p>
+ <h1>Paso 3 : Carga el archivo Deuda.xlsx . Los Títulos de las 3 columnas deben ser : Mes y Año , Fecha_Vto , Importe_Deuda.</h1>
+ <p> La columna "Mes y Año" debe estar en el formato mm-yyyy ,  "Fecha_Vto" en formato dd-mm-yyyy y la coma debe ser el separador decimal. </p>
     <form action="/process" method="post" enctype="multipart/form-data">
         <input type="file" name="excel_file" accept=".xlsx" required>
         <br><br>
