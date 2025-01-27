@@ -8,13 +8,13 @@ html_template = """
 <!DOCTYPE html>
 <html>
 <head>
-    <title> Web Aplicación para el Cálculo de los Intereses Compensatorios </title>
-     <h1> Web Aplicación para el Cálculo de Intereses Compensatorios - Versión en Desarrollo desde el 26-01-2025</h1>
-    <p> Utilizado:  HTML, Python, Flask, Pandas, GitHubPages, Render Web Hosting </p>
+    <title> Web Application para el Cálculo de los Intereses Compensatorios </title>
+     <h1> Web Application para el Cálculo de los Intereses Compensatorios - Versión en Desarrollo desde el 26-01-2025</h1>
+    <p> Herramientas utilizadas:  HTML, Python (librerías Flask y Pandas), GitHubPages, Render Web Hosting y ChatGPT </p>
 </head>
 <body>
 
-    <h1>Paso 1 : Ingresa la Fecha (inclusive) hasta cuando los intereses deben ser calculados</h1>
+    <h1>Paso 1 : Ingresa la Fecha hasta la cual (inclusive) los intereses serán calculados</h1>
     <form action="/set_date" method="post">
         <label for="calc_date">Fecha de Cálculo:</label>
         <input type="date" name="calc_date" required>
