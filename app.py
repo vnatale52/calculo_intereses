@@ -11,6 +11,8 @@ html_template = """
     <title> Web Application para el Cálculo de los Intereses Compensatorios </title>
      <h1> Web Application para el Cálculo de los Intereses Compensatorios - Versión en Desarrollo desde el 26-01-2025, by VN. </h1>
     <p> Herramientas utilizadas:  HTML, Python (librerías Flask y Pandas), GitHubPages, Render Web Hosting y ChatGPT. </p>
+    <p>  (En caso de reproceso, asegugarse que la URL sea sólo  https://calculo-intereses.onrender.com  (sin ninguna subruta a continuación de .com   ; de lo contrario, dará un error) <p>
+
 </head>
 <body>
 
@@ -244,7 +246,7 @@ def process_file():
 
         df["Mes y Año"] = pd.to_datetime(df["Mes y Año"], errors="coerce").dt.strftime("%m-%Y")
         df["Fecha_Vto"] = df["Fecha_Vto"].dt.strftime("%d-%m-%Y")
-        df[coef_acumulado_col] = df[coef_acumulado_col].round(9)   #  1 entero más redondeo a 8 decimales
+        df[coef_acumulado_col] = df[coef_acumulado_col].round(8   #  1 entero más redondeo a 7 decimales
 
         data = df.to_dict(orient="records")
 
