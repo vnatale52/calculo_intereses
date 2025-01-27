@@ -244,7 +244,7 @@ def process_file():
 
         df["Mes y Año"] = pd.to_datetime(df["Mes y Año"], errors="coerce").dt.strftime("%m-%Y")
         df["Fecha_Vto"] = df["Fecha_Vto"].dt.strftime("%d-%m-%Y")
-        df[coef_acumulado_col] = df[coef_acumulado_col].round(9)   # redondeo a un entero y 8 decimales
+        df[coef_acumulado_col] = df[coef_acumulado_col].round(9)   #  1 entero más redondeo a 8 decimales
 
         data = df.to_dict(orient="records")
 
