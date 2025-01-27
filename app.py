@@ -11,7 +11,7 @@ html_template = """
     <title> Web Application para el Cálculo de los Intereses Compensatorios </title>
      <h1> Web Application para el Cálculo de los Intereses Compensatorios - Versión en Desarrollo desde el 26-01-2025, by VN. </h1>
     <p> Herramientas utilizadas:  HTML, Python (librerías Flask y Pandas), GitHubPages, Render Web Hosting y ChatGPT. </p>
-    <p> (En caso de reproceso, asegugarse que la URL sea sólo  https://calculo-intereses.onrender.com  (sin ninguna subruta a continuación de .com   ; de lo contrario, dará un error) <p>
+    <p> (En caso de reproceso, asegurarse que la URL sea sólo  https://calculo-intereses.onrender.com  (sin ninguna subruta a continuación de .com   ; de lo contrario, dará un error) <p>
 
 </head>
 <body>
