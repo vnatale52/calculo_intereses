@@ -9,7 +9,7 @@ html_template = """
 <html>
 <head>
     <title> Web Application para el Cálculo de los Intereses Compensatorios </title>
-     <h1> Web Application para el Cálculo de los Intereses Compensatorios - Versión en Desarrollo desde el 26-01-2025, by VN </h1>
+     <h1> Web Application para el Cálculo de los Intereses Compensatorios - Versión en Desarrollo desde el 26-01-2025, by VN. </h1>
     <p> Herramientas utilizadas:  HTML, Python (librerías Flask y Pandas), GitHubPages, Render Web Hosting y ChatGPT. </p>
 </head>
 <body>
@@ -22,7 +22,7 @@ html_template = """
         <button type="submit">Establecer Fecha</button>
     </form>
 
-<h1>Paso 2 : Carga el archivo Tasas.xlsx. Los Títulos de las 3 columnas deben ser :  F_Desde , F_Hasta_Inc. , Tasa </h1>
+<h1>Paso 2 : Carga el archivo Tasas.xlsx. Los Títulos de las 3 columnas deben ser :  F_Desde , F_Hasta_Inc. , Tasa. </h1>
  <p> Las fechas deben estar en el formato dd-mm-yyyy  y la tasa nominal mensual debe estar expresada en tanto por uno, para 30 días de plazo; el denominador utilizado es siempre 30 días y no hay capitalización de intereses. </p>
     <form action="/upload_tasa" method="post" enctype="multipart/form-data">
         <input type="file" name="tasa_file" accept=".xlsx" required>
