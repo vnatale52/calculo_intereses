@@ -44,7 +44,7 @@ html_template = """
     </form>
 
     {% if data %}
-        <h2>Datos del Archivo Deuda.xlsx</h2>
+        <h2>Valor nominal de la deuda, Intereses compensatorios calculados, deuda actualizada : </h2>
         <table border="1">
             <tr>
                 <th>Mes y Año</th>
@@ -58,14 +58,14 @@ html_template = """
             </tr>
             {% for row in data %}
             <tr>
-                <td>{{ row['Mes y Año'] }}</td>
-                <td>{{ row['Fecha_Vto'] }}</td>
-                <td>{{ row['Importe_Deuda'] }}</td>
+                <td style="text-align: right;">{{ row['Mes y Año'] }}</td>
+                <td style="text-align: right;">{{ row['Fecha_Vto'] }}</td>
+                <td style="text-align: right;">{{ row['Importe_Deuda'] }}</td>
                 {% for column in extra_columns %}
-                <td>{{ row[column] }}</td>
+                <td style="text-align: right;">{{ row[column] }}</td>
                 {% endfor %}
-                <td>{{ row['Importe_Intereses'] }}</td>
-                <td>{{ row['Deuda_Actualizada'] }}</td>
+                <td style="text-align: right;">{{ row['Importe_Intereses'] }}</td>
+                <td style="text-align: right;">{{ row['Deuda_Actualizada'] }}</td>
             </tr>
             {% endfor %}
         </table>
@@ -80,10 +80,10 @@ html_template = """
             </tr>
             {% for row in subtotals %}
             <tr>
-                <td>{{ row['Año'] }}</td>
-                <td>{{ row['Subtotal_Importe_Deuda'] }}</td>
-                <td>{{ row['Subtotal_Importe_Intereses'] }}</td>
-                <td>{{ row['Subtotal_Deuda_Actualizada'] }}</td>
+                <td style="text-align: right;">{{ row['Año'] }}</td>
+                <td style="text-align: right;">{{ row['Subtotal_Importe_Deuda'] }}</td>
+                <td style="text-align: right;">{{ row['Subtotal_Importe_Intereses'] }}</td>
+                <td style="text-align: right;">{{ row['Subtotal_Deuda_Actualizada'] }}</td>
             </tr>
             {% endfor %}
         </table>
@@ -96,9 +96,9 @@ html_template = """
                 <th>Total Deuda_Actualizada</th>
             </tr>
             <tr>
-                <td>{{ totals['Total_Importe_Deuda'] }}</td>
-                <td>{{ totals['Total_Importe_Intereses'] }}</td>
-                <td>{{ totals['Total_Deuda_Actualizada'] }}</td>
+                <td style="text-align: right;">{{ totals['Total_Importe_Deuda'] }}</td>
+                <td style="text-align: right;">{{ totals['Total_Importe_Intereses'] }}</td>
+                <td style="text-align: right;">{{ totals['Total_Deuda_Actualizada'] }}</td>
             </tr>
         </table>
     {% endif %}
@@ -113,9 +113,9 @@ html_template = """
             </tr>
             {% for row in tasa_data %}
             <tr>
-                <td>{{ row['F_Desde'] }}</td>
-                <td>{{ row['F_Hasta_Inc.'] }}</td>
-                <td>{{ row['Tasa'] }}</td>
+                <td style="text-align: right;">{{ row['F_Desde'] }}</td>
+                <td style="text-align: right;">{{ row['F_Hasta_Inc.'] }}</td>
+                <td style="text-align: right;">{{ row['Tasa'] }}</td>
             </tr>
             {% endfor %}
         </table>
@@ -300,7 +300,7 @@ def process_file():
         df["Mes y Año"] = pd.to_datetime(df["Mes y Año"], errors="coerce").dt.strftime("%m-%Y")
         df["Fecha_Vto"] = df["Fecha_Vto"].dt.strftime("%d-%m-%Y")
         # Round the accumulated coefficient to 8 decimal places
-        df[coef_acumulado_col] = df[coef_acumulado_col].round(8)   #  1 entero más redondeo a 7 decimales
+        df[coef_acumulado_col] = df[coef_acumulado_col].round(8)  #  1 entero más redondeo a 7 decimales
 
         # Convert the DataFrame to a list of dictionaries for rendering in the template
         data = df.to_dict(orient="records")
