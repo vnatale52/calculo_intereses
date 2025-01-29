@@ -1,9 +1,12 @@
-from flask import Flask, request, render_template_string
-import pandas as pd
-from datetime import datetime
+# Import necessary libraries
+from flask import Flask, request, render_template_string  # Flask for web application, request to handle HTTP requests, render_template_string to render HTML templates
+import pandas as pd  # Pandas for data manipulation and analysis
+from datetime import datetime  # Datetime for handling date and time operations
 
+# Initialize the Flask application
 app = Flask(__name__)
 
+# Define the HTML template for the web application
 html_template = """
 <!DOCTYPE html>
 <html>
@@ -126,29 +129,41 @@ html_template = """
 </html>
 """
 
+# Global variables to store uploaded tasa data and calculation date
 uploaded_tasa = None
 calc_date_global = None
 
+# Route for the home page
 @app.route("/", methods=["GET"])
 def upload_file():
+    # Render the HTML template
     return render_template_string(html_template)
 
+# Route to handle the upload of the tasa file
 @app.route("/upload_tasa", methods=["POST"])
 def upload_tasa_file():
     global uploaded_tasa
+    # Get the uploaded file
     file = request.files["tasa_file"]
     if not file:
         return "No se subió ningún archivo.", 400
 
     try:
+        # Read the Excel file into a DataFrame
         df_tasa = pd.read_excel(file)
+        # Strip any leading/trailing whitespace from column names
         df_tasa.columns = df_tasa.columns.str.strip()
+        # Define the required columns
         required_columns = ["F_Desde", "F_Hasta_Inc.", "Tasa"]
+        # Check if all required columns are present
         if not all(col in df_tasa.columns for col in required_columns):
             return "El archivo no contiene las columnas esperadas.", 400
+        # Convert date columns to datetime format
         df_tasa["F_Desde"] = pd.to_datetime(df_tasa["F_Desde"], format="%d-%m-%Y", errors="coerce")
         df_tasa["F_Hasta_Inc."] = pd.to_datetime(df_tasa["F_Hasta_Inc."], format="%d-%m-%Y", errors="coerce")
+        # Store the DataFrame in the global variable
         uploaded_tasa = df_tasa
+        # Render the template with the tasa data
         return render_template_string(
             html_template,
             tasa_data=df_tasa.assign(
@@ -157,23 +172,31 @@ def upload_tasa_file():
             ).to_dict(orient="records")
         )
     except Exception as e:
+        # Handle any errors during file processing
         return f"Error al procesar el archivo: {str(e)}", 400
 
+# Route to set the calculation date
 @app.route("/set_date", methods=["POST"])
 def set_date():
     global calc_date_global
+    # Get the calculation date from the form
     calc_date = request.form.get("calc_date")
     if not calc_date:
         return "No se proporcionó ninguna fecha.", 400
     try:
+        # Convert the date string to a datetime object
         calc_date_global = datetime.strptime(calc_date, "%Y-%m-%d")
+        # Render the template with the calculation date
         return render_template_string(html_template, calc_date=calc_date_global.strftime("%d-%m-%Y"))
     except ValueError:
+        # Handle invalid date format
         return "Formato de fecha no válido.", 400
 
+# Route to process the uploaded debt file
 @app.route("/process", methods=["POST"])
 def process_file():
     global uploaded_tasa, calc_date_global
+    # Get the uploaded file
     file = request.files["excel_file"]
 
     if not file:
@@ -186,17 +209,25 @@ def process_file():
         return "No se ha establecido la fecha de cálculo.", 400
 
     try:
+        # Read the Excel file into a DataFrame
         df = pd.read_excel(file)
+        # Strip any leading/trailing whitespace from column names
         df.columns = df.columns.str.strip()
+        # Define the expected column names
         column_mapping = {"Mes y Año": "Mes y Año", "Fecha_Vto": "Fecha_Vto", "Importe_Deuda": "Importe_Deuda"}
+        # Check if all required columns are present
         if not all(col in df.columns for col in column_mapping.keys()):
             return f"El archivo no contiene las columnas esperadas. Columnas detectadas: {list(df.columns)}", 400
+        # Rename columns to standardize them
         df = df.rename(columns=column_mapping)
 
+        # Convert the due date column to datetime format
         df["Fecha_Vto"] = pd.to_datetime(df["Fecha_Vto"], format="%d-%m-%Y", errors="coerce")
+        # Check if any dates are invalid or missing
         if df["Fecha_Vto"].isnull().any():
             return "Algunas fechas de vencimiento no son válidas o están ausentes.", 400
 
+        # Function to calculate the number of days elapsed
         def calcular_dias_transcurridos(row, tasa_row):
             f_desde = tasa_row["F_Desde"]
             f_hasta = tasa_row["F_Hasta_Inc."]
@@ -209,51 +240,79 @@ def process_file():
 
             return max(0, dias_transcurridos)
 
+        # Initialize list to store extra columns
         extra_columns = []
+        # Define the column name for accumulated coefficient
         coef_acumulado_col = 'Coef_Acumulado'
 
+        # Iterate over each row in the tasa DataFrame
         for _, tasa_row in uploaded_tasa.iterrows():
             tasa_name = f"Cant_Días ({tasa_row['Tasa']})"
             extra_columns.append(tasa_name)
 
+            # Calculate the number of days elapsed for each row in the debt DataFrame
             df[tasa_name] = df.apply(lambda row: calcular_dias_transcurridos(row, tasa_row), axis=1)
 
+        # Initialize the accumulated coefficient column
         df[coef_acumulado_col] = 0
+        # Calculate the accumulated coefficient for each row
         for i in range(len(df)):
             for tasa_row in uploaded_tasa.itertuples():
                 tasa_name = f"Cant_Días ({tasa_row.Tasa})"
                 if not pd.isna(df.at[i, tasa_name]):
                     df.at[i, coef_acumulado_col] += (df.at[i, tasa_name] * tasa_row.Tasa) / 30
 
+        # Add the accumulated coefficient column to the extra columns list if not already present
         if coef_acumulado_col not in extra_columns:
             extra_columns.append(coef_acumulado_col)
 
+        # Calculate the interest amount and updated debt
         df["Importe_Intereses"] = (df["Importe_Deuda"] * df[coef_acumulado_col]).round(2)
         df["Deuda_Actualizada"] = (df["Importe_Deuda"] + df["Importe_Intereses"]).round(2)
 
-        df["Año"] = pd.to_datetime(df["Mes y Año"], format="%m-%Y", errors="coerce").dt.year
-        subtotals = df.groupby("Año").agg(
-            Subtotal_Importe_Deuda=("Importe_Deuda", "sum"),
-            Subtotal_Importe_Intereses=("Importe_Intereses", "sum"),
-            Subtotal_Deuda_Actualizada=("Deuda_Actualizada", "sum")
-        ).reset_index().to_dict(orient="records")
+        # Format the columns Importe_Deuda, Importe_Intereses, and Deuda_Actualizada
+        df["Importe_Deuda"] = df["Importe_Deuda"].apply(lambda x: "{:,.2f}".format(x).replace(",", "X").replace(".", ",").replace("X", "."))
+        df["Importe_Intereses"] = df["Importe_Intereses"].apply(lambda x: "{:,.2f}".format(x).replace(",", "X").replace(".", ",").replace("X", "."))
+        df["Deuda_Actualizada"] = df["Deuda_Actualizada"].apply(lambda x: "{:,.2f}".format(x).replace(",", "X").replace(".", ",").replace("X", "."))
 
+        # Extract the year from the "Mes y Año" column
+        df["Año"] = pd.to_datetime(df["Mes y Año"], format="%m-%Y", errors="coerce").dt.year
+        # Calculate subtotals by year
+        subtotals = df.groupby("Año").agg(
+            Subtotal_Importe_Deuda=("Importe_Deuda", lambda x: sum(float(val.replace(".", "").replace(",", ".")) for val in x)),
+            Subtotal_Importe_Intereses=("Importe_Intereses", lambda x: sum(float(val.replace(".", "").replace(",", ".")) for val in x)),
+            Subtotal_Deuda_Actualizada=("Deuda_Actualizada", lambda x: sum(float(val.replace(".", "").replace(",", ".")) for val in x))
+        ).reset_index()
+
+        # Format the subtotals
+        subtotals["Subtotal_Importe_Deuda"] = subtotals["Subtotal_Importe_Deuda"].apply(lambda x: "{:,.2f}".format(x).replace(",", "X").replace(".", ",").replace("X", "."))
+        subtotals["Subtotal_Importe_Intereses"] = subtotals["Subtotal_Importe_Intereses"].apply(lambda x: "{:,.2f}".format(x).replace(",", "X").replace(".", ",").replace("X", "."))
+        subtotals["Subtotal_Deuda_Actualizada"] = subtotals["Subtotal_Deuda_Actualizada"].apply(lambda x: "{:,.2f}".format(x).replace(",", "X").replace(".", ",").replace("X", "."))
+
+        # Calculate the total amounts
         totals = {
-            "Total_Importe_Deuda": df["Importe_Deuda"].sum(),
-            "Total_Importe_Intereses": df["Importe_Intereses"].sum(),
-            "Total_Deuda_Actualizada": df["Deuda_Actualizada"].sum()
+            "Total_Importe_Deuda": "{:,.2f}".format(df["Importe_Deuda"].apply(lambda x: float(x.replace(".", "").replace(",", "."))).sum()).replace(",", "X").replace(".", ",").replace("X", "."),
+            "Total_Importe_Intereses": "{:,.2f}".format(df["Importe_Intereses"].apply(lambda x: float(x.replace(".", "").replace(",", "."))).sum()).replace(",", "X").replace(".", ",").replace("X", "."),
+            "Total_Deuda_Actualizada": "{:,.2f}".format(df["Deuda_Actualizada"].apply(lambda x: float(x.replace(".", "").replace(",", "."))).sum()).replace(",", "X").replace(".", ",").replace("X", ".")
         }
 
+        # Format the "Mes y Año" and "Fecha_Vto" columns
         df["Mes y Año"] = pd.to_datetime(df["Mes y Año"], errors="coerce").dt.strftime("%m-%Y")
         df["Fecha_Vto"] = df["Fecha_Vto"].dt.strftime("%d-%m-%Y")
+        # Round the accumulated coefficient to 8 decimal places
         df[coef_acumulado_col] = df[coef_acumulado_col].round(8)   #  1 entero más redondeo a 7 decimales
 
+        # Convert the DataFrame to a list of dictionaries for rendering in the template
         data = df.to_dict(orient="records")
+        subtotals = subtotals.to_dict(orient="records")
 
+        # Render the template with the processed data
         return render_template_string(html_template, data=data, extra_columns=extra_columns, subtotals=subtotals, totals=totals)
     except Exception as e:
+        # Handle any errors during file processing
         return f"Error al procesar el archivo: {str(e)}", 400
 
+# Run the Flask application
 if __name__ == "__main__":
     #  app.run(debug=True)  Modificado por mí
        app.run()
