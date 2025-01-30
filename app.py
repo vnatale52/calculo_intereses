@@ -44,7 +44,8 @@ html_template = """
     </form>
 
     {% if data %}
-        <h2>Valor nominal de la deuda, Intereses compensatorios calculados, deuda actualizada : </h2>
+        <h2>Valor nominal de la deuda, Intereses compensatorios calculados y deuda actualizada : </h2>
+        <p> Mediante un simple copy and paste se puede copiar y pegar este cuadro a una hoja en Excel </p>
         <table border="1">
             <tr>
                 <th>Mes y Año</th>
@@ -168,7 +169,7 @@ def upload_tasa_file():
             html_template,
             tasa_data=df_tasa.assign(
                 F_Desde=df_tasa["F_Desde"].dt.strftime("%d-%m-%Y"),
-                F_Hasta_Inc=df_tasa["F_Hasta_Inc."].dt.strftime("%d-%m-%Y")
+                F_Hasta_Inc=df_tasa["F_Hasta_Inc."].dt.strftime("%d-%m-%Y")  # Asegurar formato dd-mm-yyyy
             ).to_dict(orient="records")
         )
     except Exception as e:
@@ -275,6 +276,9 @@ def process_file():
         df["Importe_Intereses"] = df["Importe_Intereses"].apply(lambda x: "{:,.2f}".format(x).replace(",", "X").replace(".", ",").replace("X", "."))
         df["Deuda_Actualizada"] = df["Deuda_Actualizada"].apply(lambda x: "{:,.2f}".format(x).replace(",", "X").replace(".", ",").replace("X", "."))
 
+        # Reemplazar el punto por la coma en la columna coef_acumulado_col
+        df[coef_acumulado_col] = df[coef_acumulado_col].apply(lambda x: "{:,.8f}".format(x).replace(".", ","))  # coef readondeado 8 decimales y coma como separador.
+
         # Extract the year from the "Mes y Año" column
         df["Año"] = pd.to_datetime(df["Mes y Año"], format="%m-%Y", errors="coerce").dt.year
         # Calculate subtotals by year
@@ -299,14 +303,12 @@ def process_file():
         # Format the "Mes y Año" and "Fecha_Vto" columns
         df["Mes y Año"] = pd.to_datetime(df["Mes y Año"], errors="coerce").dt.strftime("%m-%Y")
         df["Fecha_Vto"] = df["Fecha_Vto"].dt.strftime("%d-%m-%Y")
-        # Round the accumulated coefficient to 8 decimal places
-        df[coef_acumulado_col] = df[coef_acumulado_col].round(8)  #  1 entero más redondeo a 7 decimales
 
         # Convert the DataFrame to a list of dictionaries for rendering in the template
         data = df.to_dict(orient="records")
         subtotals = subtotals.to_dict(orient="records")
 
-        # Render the template with the processed data
+  		# Render the template with the processed data
         return render_template_string(html_template, data=data, extra_columns=extra_columns, subtotals=subtotals, totals=totals)
     except Exception as e:
         # Handle any errors during file processing
@@ -316,3 +318,4 @@ def process_file():
 if __name__ == "__main__":
     #  app.run(debug=True)  Modificado por mí
        app.run()
+	   
