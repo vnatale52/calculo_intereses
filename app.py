@@ -45,6 +45,7 @@ html_template = """
 
     {% if data %}
         <h2>Valor nominal de la deuda, Intereses compensatorios calculados y deuda actualizada : </h2>
+        <p> Fecha de Cálculo: {{ calc_date }} </p>
         <p> Mediante un simple copy and paste se puede copiar y pegar este cuadro a una hoja en Excel </p>
         <table border="1">
             <tr>
@@ -300,7 +301,8 @@ def process_file():
             "Total_Deuda_Actualizada": "{:,.2f}".format(df["Deuda_Actualizada"].apply(lambda x: float(x.replace(".", "").replace(",", "."))).sum()).replace(",", "X").replace(".", ",").replace("X", ".")
         }
 
-        # Format the "Mes y Año" and "Fecha_Vto" columns
+       		
+		# Format the "Mes y Año" and "Fecha_Vto" columns
         df["Mes y Año"] = pd.to_datetime(df["Mes y Año"], errors="coerce").dt.strftime("%m-%Y")
         df["Fecha_Vto"] = df["Fecha_Vto"].dt.strftime("%d-%m-%Y")
 
@@ -319,3 +321,4 @@ if __name__ == "__main__":
     #  app.run(debug=True)  Modificado por mí
        app.run()
 	   
+		
