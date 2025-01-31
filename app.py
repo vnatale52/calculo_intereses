@@ -43,7 +43,7 @@ html_template = """
 
     {% if data %}
         <h2>Valor nominal de la deuda, Intereses compensatorios calculados y deuda actualizada:</h2>
-        <h2>Fecha de Cálculo: {{ calc_date }}</h2>
+        <h2>Fecha de Cálculo, inclusive : {{ calc_date }}</h2>
         <p>Mediante un simple copy and paste se puede copiar y pegar este cuadro a una hoja en Excel</p>
         <table border="1">
             <tr>
