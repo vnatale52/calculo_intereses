@@ -44,7 +44,7 @@ html_template = """
     {% if data %}
         <h2>Valor nominal de la deuda, Intereses compensatorios calculados y deuda actualizada:</h2>
         <h2>Fecha de Cálculo, inclusive : {{ calc_date }}</h2>
-        <p>Mediante un simple copy and paste se puede copiar y pegar este cuadro a una hoja en Excel</p>
+        <p>Se puede generar una salida a PDF  - Mediante un simple "Copy and Paste" se puede exportar su contenido a Excel  -  </p>
         <table border="1">
             <tr>
                 <th>Mes y Año</th>
