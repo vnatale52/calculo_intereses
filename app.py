@@ -104,7 +104,7 @@ html_template = """
     {% endif %}
 
     {% if tasa_data %}
-        <h2>Datos del Archivo Tasa.xlsx (tasa expresada en tanto por uno).</h2>
+        <h2>Datos del Archivo Tasas.xlsx (tasa expresada en tanto por uno).</h2>
         <table border="1">
             <tr>
                 <th>F_Desde</th>
@@ -311,6 +311,8 @@ def process_file():
 
         # Renderizar la plantilla con los datos procesados y la fecha de cálculo
         return render_template_string(html_template, data=data, extra_columns=extra_columns, subtotals=subtotals, totals=totals, calc_date=calc_date_global.strftime("%d-%m-%Y"))
+        # return render_template_string(html_template, data=data, extra_columns=extra_columns, subtotals=subtotals, totals=totals)
+    
     except Exception as e:
         # Manejar cualquier error durante el procesamiento del archivo
         return f"Error al procesar el archivo: {str(e)}", 400
