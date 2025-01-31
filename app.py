@@ -12,8 +12,8 @@ html_template = """
 <html>
 <head>
     <title>Web Application para el Cálculo de los Intereses Compensatorios</title>
-    <h1>Web Application para el Cálculo de los Intereses Compensatorios - Versión en Desarrollo desde el 26-01-2025, by VN.</h1>
-    <p>Herramientas utilizadas: HTML, Python (librerías Flask y Pandas), GitHubPages, Render Web Hosting y ChatGPT.</p>
+    <h1>Web Application para el Cálculo de Intereses Compensatorios - Versión en Desarrollo desde el 26-01-2025, by VN.</h1>
+    <p>Herramientas utilizadas: HTML, Python (librerías Flask y Pandas), Servidores GitHubPages y Render Web Hosting e IA ChatGPT y DeepSeek.</p>
     <p>(En caso de reproceso, asegurarse que la URL sea sólo https://calculo-intereses.onrender.com (sin ninguna subruta a continuación de .com; de lo contrario, dará un error)</p>
 </head>
 <body>
@@ -44,7 +44,7 @@ html_template = """
     {% if data %}
         <h2>Cálculo realizado:  Valor nominal de la deuda, Intereses compensatorios calculados y Deuda actualizada:</h2>
         <h2>Fecha de Cálculo, inclusive : {{ calc_date }}</h2>
-        <p>Mediante un simple "Copy and Paste" se puede exportar su contenido a Excel.También, se puede generar una salida a PDF para su impresión --  </p>
+        <p>Mediante un simple "Copy and Paste" se puede exportar su contenido a una WorkSheet. También, se puede generar una salida a PDF para su impresión.</p>
         <table border="1">
             <tr>
                 <th>Mes y Año</th>
@@ -104,7 +104,7 @@ html_template = """
     {% endif %}
 
     {% if tasa_data %}
-        <h2>Datos del Archivo Tasa.xlsx</h2>
+        <h2>Datos del Archivo Tasa.xlsx (tasa expresada en tanto por uno).</h2>
         <table border="1">
             <tr>
                 <th>F_Desde</th>
@@ -114,7 +114,7 @@ html_template = """
             {% for row in tasa_data %}
             <tr>
                 <td style="text-align: right;">{{ row['F_Desde'] }}</td>
-                <td style="text-align: right;">{{ row['F_Hasta_Inc.'] }}</td>
+                <td style="text-align: right;">{{ row['F_Hasta_Inc'] }}</td>
                 <td style="text-align: right;">{{ row['Tasa'] }}</td>
             </tr>
             {% endfor %}
@@ -161,6 +161,7 @@ def upload_tasa_file():
         # Convertir las columnas de fecha al formato datetime
         df_tasa["F_Desde"] = pd.to_datetime(df_tasa["F_Desde"], format="%d-%m-%Y", errors="coerce")
         df_tasa["F_Hasta_Inc."] = pd.to_datetime(df_tasa["F_Hasta_Inc."], format="%d-%m-%Y", errors="coerce")
+        
         # Almacenar el DataFrame en la variable global
         uploaded_tasa = df_tasa
         # Renderizar la plantilla con los datos de tasa
@@ -168,7 +169,8 @@ def upload_tasa_file():
             html_template,
             tasa_data=df_tasa.assign(
                 F_Desde=df_tasa["F_Desde"].dt.strftime("%d-%m-%Y"),
-                F_Hasta_Inc=df_tasa["F_Hasta_Inc."].dt.strftime("%d-%m-%Y")  # Asegurar formato dd-mm-yyyy
+                F_Hasta_Inc=df_tasa["F_Hasta_Inc."].dt.strftime("%d-%m-%Y"),
+                Tasa=df_tasa["Tasa"].apply(lambda x: "{:,.4f}".format(x).replace(".", ","))  # Formatear la columna "Tasa" con 4 decimales y coma como separador
             ).to_dict(orient="records")
         )
     except Exception as e:
