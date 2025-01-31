@@ -1,25 +1,23 @@
 # Import necessary libraries
-from flask import Flask, request, render_template_string  # Flask for web application, request to handle HTTP requests, render_template_string to render HTML templates
-import pandas as pd  # Pandas for data manipulation and analysis
-from datetime import datetime  # Datetime for handling date and time operations
+from flask import Flask, request, render_template_string  # Flask para la aplicación web, request para manejar solicitudes HTTP, render_template_string para renderizar plantillas HTML
+import pandas as pd  # Pandas para manipulación y análisis de datos
+from datetime import datetime  # Datetime para manejar operaciones de fecha y hora
 
-# Initialize the Flask application
+# Inicializar la aplicación Flask
 app = Flask(__name__)
 
-# Define the HTML template for the web application
+# Definir la plantilla HTML para la aplicación web
 html_template = """
 <!DOCTYPE html>
 <html>
 <head>
-    <title> Web Application para el Cálculo de los Intereses Compensatorios </title>
-     <h1> Web Application para el Cálculo de los Intereses Compensatorios - Versión en Desarrollo desde el 26-01-2025, by VN. </h1>
-    <p> Herramientas utilizadas:  HTML, Python (librerías Flask y Pandas), GitHubPages, Render Web Hosting y ChatGPT. </p>
-    <p> (En caso de reproceso, asegurarse que la URL sea sólo  https://calculo-intereses.onrender.com  (sin ninguna subruta a continuación de .com   ; de lo contrario, dará un error) <p>
-
+    <title>Web Application para el Cálculo de los Intereses Compensatorios</title>
+    <h1>Web Application para el Cálculo de los Intereses Compensatorios - Versión en Desarrollo desde el 26-01-2025, by VN.</h1>
+    <p>Herramientas utilizadas: HTML, Python (librerías Flask y Pandas), GitHubPages, Render Web Hosting y ChatGPT.</p>
+    <p>(En caso de reproceso, asegurarse que la URL sea sólo https://calculo-intereses.onrender.com (sin ninguna subruta a continuación de .com; de lo contrario, dará un error)</p>
 </head>
 <body>
-
-    <h1>Paso 1 : Ingresa la Fecha hasta la cual (inclusive) los intereses serán calculados.</h1>
+    <h1>Paso 1: Ingresa la Fecha hasta la cual (inclusive) los intereses serán calculados.</h1>
     <form action="/set_date" method="post">
         <label for="calc_date">Fecha de Cálculo:</label>
         <input type="date" name="calc_date" required>
@@ -27,16 +25,16 @@ html_template = """
         <button type="submit">Establecer Fecha</button>
     </form>
 
-<h1>Paso 2 : Carga el archivo Tasas.xlsx. Los Títulos de las 3 columnas deben ser :  F_Desde , F_Hasta_Inc. , Tasa. </h1>
- <p> Las fechas deben estar en el formato dd-mm-yyyy  y la tasa nominal mensual debe estar expresada en tanto por uno, para 30 días de plazo; el denominador utilizado es siempre 30 días y no hay capitalización de intereses. </p>
+    <h1>Paso 2: Carga el archivo Tasas.xlsx. Los Títulos de las 3 columnas deben ser: F_Desde, F_Hasta_Inc., Tasa.</h1>
+    <p>Las fechas deben estar en el formato dd-mm-yyyy y la tasa nominal mensual debe estar expresada en tanto por uno, para 30 días de plazo; el denominador utilizado es siempre 30 días y no hay capitalización de intereses.</p>
     <form action="/upload_tasa" method="post" enctype="multipart/form-data">
         <input type="file" name="tasa_file" accept=".xlsx" required>
         <br><br>
         <button type="submit">Cargar Archivo</button>
     </form>
 
- <h1>Paso 3 : Carga el archivo Deuda.xlsx . Los Títulos de las 3 columnas deben ser : Mes y Año , Fecha_Vto , Importe_Deuda.</h1>
- <p> La columna "Mes y Año" debe estar en el formato mm-yyyy ,  "Fecha_Vto" en formato dd-mm-yyyy y la coma debe ser el separador decimal. </p>
+    <h1>Paso 3: Carga el archivo Deuda.xlsx. Los Títulos de las 3 columnas deben ser: Mes y Año, Fecha_Vto, Importe_Deuda.</h1>
+    <p>La columna "Mes y Año" debe estar en el formato mm-yyyy, "Fecha_Vto" en formato dd-mm-yyyy y la coma debe ser el separador decimal.</p>
     <form action="/process" method="post" enctype="multipart/form-data">
         <input type="file" name="excel_file" accept=".xlsx" required>
         <br><br>
@@ -44,9 +42,9 @@ html_template = """
     </form>
 
     {% if data %}
-        <h2>Valor nominal de la deuda, Intereses compensatorios calculados y deuda actualizada : </h2>
-        <p> Fecha de Cálculo: {{ calc_date }} </p>
-        <p> Mediante un simple copy and paste se puede copiar y pegar este cuadro a una hoja en Excel </p>
+        <h2>Valor nominal de la deuda, Intereses compensatorios calculados y deuda actualizada:</h2>
+        <h2>Fecha de Cálculo: {{ calc_date }}</h2>
+        <p>Mediante un simple copy and paste se puede copiar y pegar este cuadro a una hoja en Excel</p>
         <table border="1">
             <tr>
                 <th>Mes y Año</th>
@@ -131,41 +129,41 @@ html_template = """
 </html>
 """
 
-# Global variables to store uploaded tasa data and calculation date
+# Variables globales para almacenar los datos de tasa cargados y la fecha de cálculo
 uploaded_tasa = None
 calc_date_global = None
 
-# Route for the home page
+# Ruta para la página de inicio
 @app.route("/", methods=["GET"])
 def upload_file():
-    # Render the HTML template
+    # Renderizar la plantilla HTML
     return render_template_string(html_template)
 
-# Route to handle the upload of the tasa file
+# Ruta para manejar la carga del archivo de tasas
 @app.route("/upload_tasa", methods=["POST"])
 def upload_tasa_file():
     global uploaded_tasa
-    # Get the uploaded file
+    # Obtener el archivo cargado
     file = request.files["tasa_file"]
     if not file:
         return "No se subió ningún archivo.", 400
 
     try:
-        # Read the Excel file into a DataFrame
+        # Leer el archivo Excel en un DataFrame
         df_tasa = pd.read_excel(file)
-        # Strip any leading/trailing whitespace from column names
+        # Eliminar espacios en blanco al principio y al final de los nombres de las columnas
         df_tasa.columns = df_tasa.columns.str.strip()
-        # Define the required columns
+        # Definir las columnas requeridas
         required_columns = ["F_Desde", "F_Hasta_Inc.", "Tasa"]
-        # Check if all required columns are present
+        # Verificar si todas las columnas requeridas están presentes
         if not all(col in df_tasa.columns for col in required_columns):
             return "El archivo no contiene las columnas esperadas.", 400
-        # Convert date columns to datetime format
+        # Convertir las columnas de fecha al formato datetime
         df_tasa["F_Desde"] = pd.to_datetime(df_tasa["F_Desde"], format="%d-%m-%Y", errors="coerce")
         df_tasa["F_Hasta_Inc."] = pd.to_datetime(df_tasa["F_Hasta_Inc."], format="%d-%m-%Y", errors="coerce")
-        # Store the DataFrame in the global variable
+        # Almacenar el DataFrame en la variable global
         uploaded_tasa = df_tasa
-        # Render the template with the tasa data
+        # Renderizar la plantilla con los datos de tasa
         return render_template_string(
             html_template,
             tasa_data=df_tasa.assign(
@@ -174,31 +172,31 @@ def upload_tasa_file():
             ).to_dict(orient="records")
         )
     except Exception as e:
-        # Handle any errors during file processing
+        # Manejar cualquier error durante el procesamiento del archivo
         return f"Error al procesar el archivo: {str(e)}", 400
 
-# Route to set the calculation date
+# Ruta para establecer la fecha de cálculo
 @app.route("/set_date", methods=["POST"])
 def set_date():
     global calc_date_global
-    # Get the calculation date from the form
+    # Obtener la fecha de cálculo del formulario
     calc_date = request.form.get("calc_date")
     if not calc_date:
         return "No se proporcionó ninguna fecha.", 400
     try:
-        # Convert the date string to a datetime object
+        # Convertir la cadena de fecha a un objeto datetime
         calc_date_global = datetime.strptime(calc_date, "%Y-%m-%d")
-        # Render the template with the calculation date
+        # Renderizar la plantilla con la fecha de cálculo
         return render_template_string(html_template, calc_date=calc_date_global.strftime("%d-%m-%Y"))
     except ValueError:
-        # Handle invalid date format
+        # Manejar formato de fecha no válido
         return "Formato de fecha no válido.", 400
 
-# Route to process the uploaded debt file
+# Ruta para procesar el archivo de deuda cargado
 @app.route("/process", methods=["POST"])
 def process_file():
     global uploaded_tasa, calc_date_global
-    # Get the uploaded file
+    # Obtener el archivo cargado
     file = request.files["excel_file"]
 
     if not file:
@@ -211,25 +209,25 @@ def process_file():
         return "No se ha establecido la fecha de cálculo.", 400
 
     try:
-        # Read the Excel file into a DataFrame
+        # Leer el archivo Excel en un DataFrame
         df = pd.read_excel(file)
-        # Strip any leading/trailing whitespace from column names
+        # Eliminar espacios en blanco al principio y al final de los nombres de las columnas
         df.columns = df.columns.str.strip()
-        # Define the expected column names
+        # Definir los nombres de las columnas esperadas
         column_mapping = {"Mes y Año": "Mes y Año", "Fecha_Vto": "Fecha_Vto", "Importe_Deuda": "Importe_Deuda"}
-        # Check if all required columns are present
+        # Verificar si todas las columnas requeridas están presentes
         if not all(col in df.columns for col in column_mapping.keys()):
             return f"El archivo no contiene las columnas esperadas. Columnas detectadas: {list(df.columns)}", 400
-        # Rename columns to standardize them
+        # Renombrar las columnas para estandarizarlas
         df = df.rename(columns=column_mapping)
 
-        # Convert the due date column to datetime format
+        # Convertir la columna de fecha de vencimiento al formato datetime
         df["Fecha_Vto"] = pd.to_datetime(df["Fecha_Vto"], format="%d-%m-%Y", errors="coerce")
-        # Check if any dates are invalid or missing
+        # Verificar si alguna fecha no es válida o está ausente
         if df["Fecha_Vto"].isnull().any():
             return "Algunas fechas de vencimiento no son válidas o están ausentes.", 400
 
-        # Function to calculate the number of days elapsed
+        # Función para calcular el número de días transcurridos
         def calcular_dias_transcurridos(row, tasa_row):
             f_desde = tasa_row["F_Desde"]
             f_hasta = tasa_row["F_Hasta_Inc."]
@@ -242,83 +240,79 @@ def process_file():
 
             return max(0, dias_transcurridos)
 
-        # Initialize list to store extra columns
+        # Inicializar la lista para almacenar columnas adicionales
         extra_columns = []
-        # Define the column name for accumulated coefficient
+        # Definir el nombre de la columna para el coeficiente acumulado
         coef_acumulado_col = 'Coef_Acumulado'
 
-        # Iterate over each row in the tasa DataFrame
+        # Iterar sobre cada fila en el DataFrame de tasas
         for _, tasa_row in uploaded_tasa.iterrows():
             tasa_name = f"Cant_Días ({tasa_row['Tasa']})"
             extra_columns.append(tasa_name)
 
-            # Calculate the number of days elapsed for each row in the debt DataFrame
+            # Calcular el número de días transcurridos para cada fila en el DataFrame de deuda
             df[tasa_name] = df.apply(lambda row: calcular_dias_transcurridos(row, tasa_row), axis=1)
 
-        # Initialize the accumulated coefficient column
+        # Inicializar la columna de coeficiente acumulado
         df[coef_acumulado_col] = 0
-        # Calculate the accumulated coefficient for each row
+        # Calcular el coeficiente acumulado para cada fila
         for i in range(len(df)):
             for tasa_row in uploaded_tasa.itertuples():
                 tasa_name = f"Cant_Días ({tasa_row.Tasa})"
                 if not pd.isna(df.at[i, tasa_name]):
                     df.at[i, coef_acumulado_col] += (df.at[i, tasa_name] * tasa_row.Tasa) / 30
 
-        # Add the accumulated coefficient column to the extra columns list if not already present
+        # Agregar la columna de coeficiente acumulado a la lista de columnas adicionales si no está presente
         if coef_acumulado_col not in extra_columns:
             extra_columns.append(coef_acumulado_col)
 
-        # Calculate the interest amount and updated debt
+        # Calcular el monto de intereses y la deuda actualizada
         df["Importe_Intereses"] = (df["Importe_Deuda"] * df[coef_acumulado_col]).round(2)
         df["Deuda_Actualizada"] = (df["Importe_Deuda"] + df["Importe_Intereses"]).round(2)
 
-        # Format the columns Importe_Deuda, Importe_Intereses, and Deuda_Actualizada
+        # Formatear las columnas Importe_Deuda, Importe_Intereses y Deuda_Actualizada
         df["Importe_Deuda"] = df["Importe_Deuda"].apply(lambda x: "{:,.2f}".format(x).replace(",", "X").replace(".", ",").replace("X", "."))
         df["Importe_Intereses"] = df["Importe_Intereses"].apply(lambda x: "{:,.2f}".format(x).replace(",", "X").replace(".", ",").replace("X", "."))
         df["Deuda_Actualizada"] = df["Deuda_Actualizada"].apply(lambda x: "{:,.2f}".format(x).replace(",", "X").replace(".", ",").replace("X", "."))
 
         # Reemplazar el punto por la coma en la columna coef_acumulado_col
-        df[coef_acumulado_col] = df[coef_acumulado_col].apply(lambda x: "{:,.8f}".format(x).replace(".", ","))  # coef readondeado 8 decimales y coma como separador.
+        df[coef_acumulado_col] = df[coef_acumulado_col].apply(lambda x: "{:,.8f}".format(x).replace(".", ","))  # coef redondeado a 8 decimales y coma como separador.
 
-        # Extract the year from the "Mes y Año" column
+        # Extraer el año de la columna "Mes y Año"
         df["Año"] = pd.to_datetime(df["Mes y Año"], format="%m-%Y", errors="coerce").dt.year
-        # Calculate subtotals by year
+        # Calcular subtotales por año
         subtotals = df.groupby("Año").agg(
             Subtotal_Importe_Deuda=("Importe_Deuda", lambda x: sum(float(val.replace(".", "").replace(",", ".")) for val in x)),
             Subtotal_Importe_Intereses=("Importe_Intereses", lambda x: sum(float(val.replace(".", "").replace(",", ".")) for val in x)),
             Subtotal_Deuda_Actualizada=("Deuda_Actualizada", lambda x: sum(float(val.replace(".", "").replace(",", ".")) for val in x))
         ).reset_index()
 
-        # Format the subtotals
+        # Formatear los subtotales
         subtotals["Subtotal_Importe_Deuda"] = subtotals["Subtotal_Importe_Deuda"].apply(lambda x: "{:,.2f}".format(x).replace(",", "X").replace(".", ",").replace("X", "."))
         subtotals["Subtotal_Importe_Intereses"] = subtotals["Subtotal_Importe_Intereses"].apply(lambda x: "{:,.2f}".format(x).replace(",", "X").replace(".", ",").replace("X", "."))
         subtotals["Subtotal_Deuda_Actualizada"] = subtotals["Subtotal_Deuda_Actualizada"].apply(lambda x: "{:,.2f}".format(x).replace(",", "X").replace(".", ",").replace("X", "."))
 
-        # Calculate the total amounts
+        # Calcular los totales generales
         totals = {
             "Total_Importe_Deuda": "{:,.2f}".format(df["Importe_Deuda"].apply(lambda x: float(x.replace(".", "").replace(",", "."))).sum()).replace(",", "X").replace(".", ",").replace("X", "."),
             "Total_Importe_Intereses": "{:,.2f}".format(df["Importe_Intereses"].apply(lambda x: float(x.replace(".", "").replace(",", "."))).sum()).replace(",", "X").replace(".", ",").replace("X", "."),
             "Total_Deuda_Actualizada": "{:,.2f}".format(df["Deuda_Actualizada"].apply(lambda x: float(x.replace(".", "").replace(",", "."))).sum()).replace(",", "X").replace(".", ",").replace("X", ".")
         }
 
-       		
-		# Format the "Mes y Año" and "Fecha_Vto" columns
+        # Formatear las columnas "Mes y Año" y "Fecha_Vto"
         df["Mes y Año"] = pd.to_datetime(df["Mes y Año"], errors="coerce").dt.strftime("%m-%Y")
         df["Fecha_Vto"] = df["Fecha_Vto"].dt.strftime("%d-%m-%Y")
 
-        # Convert the DataFrame to a list of dictionaries for rendering in the template
+        # Convertir el DataFrame a una lista de diccionarios para renderizar en la plantilla
         data = df.to_dict(orient="records")
         subtotals = subtotals.to_dict(orient="records")
 
-  		# Render the template with the processed data
-        return render_template_string(html_template, data=data, extra_columns=extra_columns, subtotals=subtotals, totals=totals)
+        # Renderizar la plantilla con los datos procesados y la fecha de cálculo
+        return render_template_string(html_template, data=data, extra_columns=extra_columns, subtotals=subtotals, totals=totals, calc_date=calc_date_global.strftime("%d-%m-%Y"))
     except Exception as e:
-        # Handle any errors during file processing
+        # Manejar cualquier error durante el procesamiento del archivo
         return f"Error al procesar el archivo: {str(e)}", 400
 
-# Run the Flask application
+# Ejecutar la aplicación Flask
 if __name__ == "__main__":
-    #  app.run(debug=True)  Modificado por mí
-       app.run()
-	   
-		
+    app.run()
