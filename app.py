@@ -42,9 +42,9 @@ html_template = """
     </form>
 
     {% if data %}
-        <h2>Valor nominal de la deuda, Intereses compensatorios calculados y deuda actualizada:</h2>
+        <h2>Cálculo realizado:  Valor nominal de la deuda, Intereses compensatorios calculados y Deuda actualizada:</h2>
         <h2>Fecha de Cálculo, inclusive : {{ calc_date }}</h2>
-        <p>Se puede generar una salida a PDF  - Mediante un simple "Copy and Paste" se puede exportar su contenido a Excel  -  </p>
+        <p>Mediante un simple "Copy and Paste" se puede exportar su contenido a Excel.También, se puede generar una salida a PDF para su impresión --  </p>
         <table border="1">
             <tr>
                 <th>Mes y Año</th>
