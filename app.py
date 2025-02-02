@@ -11,10 +11,7 @@ html_template = """
 <!DOCTYPE html>
 <html>
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="description" content="Application para el Cálculo de los Intereses Compensatorios o Resarcitorios AGIP - by Vincenzo Natale" />
-
+    
     <title>Web Application para el Cálculo de los Intereses Compensatorios</title>
     <h1>Web Application para el Cálculo de Intereses Compensatorios - Versión en Desarrollo desde el 26-01-2025, by VN.</h1>
     <p>Herramientas utilizadas: HTML, Python (librerías Flask y Pandas), Servidores GitHubPages y Render Web Hosting (que tarda varios segundos en correr) e IA ChatGPT y DeepSeek. </p>
