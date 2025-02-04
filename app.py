@@ -132,7 +132,7 @@ html_template = """
     
   
  
- <p>Contacto: <a href="mailto:vnatale52@gmail.com">Enviar un correo</a></p>
+ <p>Contacto: <a href="mailto:vnatale52@gmail.com">Para enviar un correo a Vincenzo Natale</a></p>
     
     <button onclick="sendLike()">Like ❤️</button>
     <p id="likes">Likes: {{ likes }}</p>
