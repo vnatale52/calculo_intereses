@@ -1,5 +1,5 @@
 # Import necessary libraries
-from flask import Flask, request, render_template_string  # Flask para la aplicación web, request para manejar solicitudes HTTP, render_template_string para renderizar plantillas HTML
+from flask import Flask, request, render_template_string, session, jsonify  # Flask para la aplicación web, request para manejar solicitudes HTTP, render_template_string para renderizar plantillas HTML
 import pandas as pd  # Pandas para manipulación y análisis de datos
 from datetime import datetime  # Datetime para manejar operaciones de fecha y hora
 
@@ -11,7 +11,10 @@ html_template = """
 <!DOCTYPE html>
 <html>
 <head>
-    
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="Application para el Cálculo de los Intereses Compensatorios o Resarcitorios AGIP - by Vincenzo Natale" />
+
     <title>Web Application para el Cálculo de los Intereses Compensatorios</title>
     <h1>Web Application para el Cálculo de Intereses Compensatorios - Versión en Desarrollo desde el 26-01-2025, by VN.</h1>
     <p>Herramientas utilizadas: HTML, Python (librerías Flask y Pandas), Servidores GitHubPages y Render Web Hosting (que tarda varios segundos en correr) e IA ChatGPT y DeepSeek. </p>
@@ -126,6 +129,25 @@ html_template = """
         <h2>Fecha de Cálculo</h2>
         <p>{{ calc_date }}</p>
     {% endif %}
+    
+  
+ 
+ <p>Contacto: <a href="mailto:vnatale52@gmail.com">Enviar un correo</a></p>
+    
+    <button onclick="sendLike()">Like ❤️</button>
+    <p id="likes">Likes: {{ likes }}</p>
+    
+    <script>
+        function sendLike() {
+            fetch('/like', {method: 'POST'})
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById('likes').innerText = 'Likes: ' + data.likes;
+            });
+        }
+    </script>
+     
+    
 </body>
 </html>
 """
@@ -318,6 +340,22 @@ def process_file():
         # Manejar cualquier error durante el procesamiento del archivo
         return f"Error al procesar el archivo: {str(e)}", 400
 
+
+
+# Ruta para la página de inicio para los likes
+@app.route("/", methods=["GET"])
+def home():
+    if "likes_count" not in session:
+        session["likes_count"] = 0
+    return render_template_string(html_template, likes=session["likes_count"])
+
+# Ruta para manejar los likes
+@app.route("/like", methods=["POST"])
+def like():
+    likes = session.get("likes_count", 0) + 1
+    session["likes_count"] = likes
+    return jsonify({"likes": likes})
+
 # Ejecutar la aplicación Flask
 if __name__ == "__main__":
-    app.run()
+    app.run(debug=True)
