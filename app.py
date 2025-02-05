@@ -59,7 +59,7 @@ html_template = """
     <p>Herramientas utilizadas: HTML, Python (librerías Flask y Pandas), Servidores GitHubPages y Render Web Hosting (que tarda varios segundos en correr) e IA ChatGPT y DeepSeek. </p>
     <p>En caso de reproceso, asegurarse que la URL sea sólo https://calculo-intereses.onrender.com (sin ninguna subruta a continuación de .com , de lo contrario, dará un error)</p>
 </head>
-<body>
+<body style="background-color: grey;">
     <h1>Paso 1: Ingresa la Fecha hasta la cual (inclusive) los intereses serán calculados.</h1>
     <form action="/set_date" method="post">
         <label for="calc_date">Fecha de Cálculo:</label>
