@@ -1,12 +1,20 @@
 # Import necessary libraries
-from flask import Flask, request, render_template_string, session, jsonify  # Flask para la aplicación web, request para manejar solicitudes HTTP, render_template_string para renderizar plantillas HTML
-import pandas as pd  # Pandas para manipulación y análisis de datos
-from datetime import datetime  # Datetime para manejar operaciones de fecha y hora
+from flask import Flask, request, render_template_string, session, jsonify, flash
+import pandas as pd
+from datetime import datetime
+import logging
+import os
 
-# Inicializar la aplicación Flask
+# Initialize the Flask application
 app = Flask(__name__)
 
-# Definir la plantilla HTML para la aplicación web
+# Set a secret key for session management
+app.secret_key = os.getenv('SECRET_KEY', 'default_secret_key')
+
+# Configure logging
+logging.basicConfig(level=logging.DEBUG)
+
+# Define the HTML template for the web application
 html_template = """
 <!DOCTYPE html>
 <html>
@@ -18,7 +26,7 @@ html_template = """
     <title>Web Application para el Cálculo de los Intereses Compensatorios</title>
     <h1>Web Application para el Cálculo de Intereses Compensatorios - Versión en Desarrollo desde el 26-01-2025, by VN.</h1>
     <p>Herramientas utilizadas: HTML, Python (librerías Flask y Pandas), Servidores GitHubPages y Render Web Hosting (que tarda varios segundos en correr) e IA ChatGPT y DeepSeek. </p>
-    <p>(En caso de reproceso, asegurarse que la URL sea sólo https://calculo-intereses.onrender.com (sin ninguna subruta a continuación de .com; de lo contrario, dará un error)</p>
+    <p>En caso de reproceso, asegurarse que la URL sea sólo https://calculo-intereses.onrender.com (sin ninguna subruta a continuación de .com , de lo contrario, dará un error)</p>
 </head>
 <body>
     <h1>Paso 1: Ingresa la Fecha hasta la cual (inclusive) los intereses serán calculados.</h1>
@@ -26,7 +34,7 @@ html_template = """
         <label for="calc_date">Fecha de Cálculo:</label>
         <input type="date" name="calc_date" required>
         <br><br>
-        <button type="submit">Establecer Fecha</button>
+        <button type="submit">Establecer Fecha de Cálculo</button>
     </form>
 
     <h1>Paso 2: Carga el archivo Tasas.xlsx. Los Títulos de las 3 columnas deben ser: F_Desde, F_Hasta_Inc., Tasa.</h1>
@@ -130,9 +138,7 @@ html_template = """
         <p>{{ calc_date }}</p>
     {% endif %}
     
-  
- 
- <p>Contacto: <a href="mailto:vnatale52@gmail.com">Para enviar un correo a Vincenzo Natale</a></p>
+    <p>Contacto: <a href="mailto:vnatale52@gmail.com">Enviar un correo electrónico a Vincenzo Natale.</a></p>
     
     <button onclick="sendLike()">Like ❤️</button>
     <p id="likes">Likes: {{ likes }}</p>
@@ -146,113 +152,109 @@ html_template = """
             });
         }
     </script>
-     
-    
 </body>
 </html>
 """
 
-# Variables globales para almacenar los datos de tasa cargados y la fecha de cálculo
+# Helper function to format numbers
+def format_number(value):
+    return "{:,.2f}".format(value).replace(",", "X").replace(".", ",").replace("X", ".")
+
+# Helper function to validate DataFrame columns
+def validate_dataframe(df, required_columns):
+    if not all(col in df.columns for col in required_columns):
+        raise ValueError(f"Missing required columns: {required_columns}")
+
+# Global variables to store uploaded tasa data and calculation date
 uploaded_tasa = None
 calc_date_global = None
 
-# Ruta para la página de inicio
+# Route for the home page
 @app.route("/", methods=["GET"])
-def upload_file():
-    # Renderizar la plantilla HTML
-    return render_template_string(html_template)
+def home():
+    if "likes_count" not in session:
+        session["likes_count"] = 0
+    return render_template_string(html_template, likes=session["likes_count"])
 
-# Ruta para manejar la carga del archivo de tasas
+# Route to handle file upload for tasa data
 @app.route("/upload_tasa", methods=["POST"])
 def upload_tasa_file():
     global uploaded_tasa
-    # Obtener el archivo cargado
     file = request.files["tasa_file"]
     if not file:
-        return "No se subió ningún archivo.", 400
+        flash("No se subió ningún archivo.", "error")
+        return render_template_string(html_template)
 
     try:
-        # Leer el archivo Excel en un DataFrame
         df_tasa = pd.read_excel(file)
-        # Eliminar espacios en blanco al principio y al final de los nombres de las columnas
         df_tasa.columns = df_tasa.columns.str.strip()
-        # Definir las columnas requeridas
         required_columns = ["F_Desde", "F_Hasta_Inc.", "Tasa"]
-        # Verificar si todas las columnas requeridas están presentes
-        if not all(col in df_tasa.columns for col in required_columns):
-            return "El archivo no contiene las columnas esperadas.", 400
-        # Convertir las columnas de fecha al formato datetime
+        validate_dataframe(df_tasa, required_columns)
+
         df_tasa["F_Desde"] = pd.to_datetime(df_tasa["F_Desde"], format="%d-%m-%Y", errors="coerce")
         df_tasa["F_Hasta_Inc."] = pd.to_datetime(df_tasa["F_Hasta_Inc."], format="%d-%m-%Y", errors="coerce")
-        
-        # Almacenar el DataFrame en la variable global
+
         uploaded_tasa = df_tasa
-        # Renderizar la plantilla con los datos de tasa
+        flash("Archivo de tasas cargado exitosamente.", "success")
         return render_template_string(
             html_template,
             tasa_data=df_tasa.assign(
                 F_Desde=df_tasa["F_Desde"].dt.strftime("%d-%m-%Y"),
                 F_Hasta_Inc=df_tasa["F_Hasta_Inc."].dt.strftime("%d-%m-%Y"),
-                Tasa=df_tasa["Tasa"].apply(lambda x: "{:,.4f}".format(x).replace(".", ","))  # Formatear la columna "Tasa" con 4 decimales y coma como separador
+                Tasa=df_tasa["Tasa"].apply(lambda x: "{:,.4f}".format(x).replace(".", ","))
             ).to_dict(orient="records")
         )
     except Exception as e:
-        # Manejar cualquier error durante el procesamiento del archivo
-        return f"Error al procesar el archivo: {str(e)}", 400
+        logging.error(f"Error processing tasa file: {str(e)}")
+        flash(f"Error al procesar el archivo: {str(e)}", "error")
+        return render_template_string(html_template)
 
-# Ruta para establecer la fecha de cálculo
+# Route to set the calculation date
 @app.route("/set_date", methods=["POST"])
 def set_date():
     global calc_date_global
-    # Obtener la fecha de cálculo del formulario
     calc_date = request.form.get("calc_date")
     if not calc_date:
-        return "No se proporcionó ninguna fecha.", 400
+        flash("No se proporcionó ninguna fecha.", "error")
+        return render_template_string(html_template)
+
     try:
-        # Convertir la cadena de fecha a un objeto datetime
         calc_date_global = datetime.strptime(calc_date, "%Y-%m-%d")
-        # Renderizar la plantilla con la fecha de cálculo
+        flash(f"Fecha de cálculo establecida: {calc_date_global.strftime('%d-%m-%Y')}", "success")
         return render_template_string(html_template, calc_date=calc_date_global.strftime("%d-%m-%Y"))
     except ValueError:
-        # Manejar formato de fecha no válido
-        return "Formato de fecha no válido.", 400
+        flash("Formato de fecha no válido.", "error")
+        return render_template_string(html_template)
 
-# Ruta para procesar el archivo de deuda cargado
+# Route to process the uploaded debt file
 @app.route("/process", methods=["POST"])
 def process_file():
     global uploaded_tasa, calc_date_global
-    # Obtener el archivo cargado
     file = request.files["excel_file"]
 
     if not file:
-        return "No se cargó ningún archivo.", 400
+        flash("No se cargó ningún archivo.", "error")
+        return render_template_string(html_template)
 
     if uploaded_tasa is None:
-        return "No se ha cargado el archivo Tasa.xlsx.", 400
+        flash("No se ha cargado el archivo Tasa.xlsx.", "error")
+        return render_template_string(html_template)
 
     if calc_date_global is None:
-        return "No se ha establecido la fecha de cálculo.", 400
+        flash("No se ha establecido la fecha de cálculo.", "error")
+        return render_template_string(html_template)
 
     try:
-        # Leer el archivo Excel en un DataFrame
         df = pd.read_excel(file)
-        # Eliminar espacios en blanco al principio y al final de los nombres de las columnas
         df.columns = df.columns.str.strip()
-        # Definir los nombres de las columnas esperadas
-        column_mapping = {"Mes y Año": "Mes y Año", "Fecha_Vto": "Fecha_Vto", "Importe_Deuda": "Importe_Deuda"}
-        # Verificar si todas las columnas requeridas están presentes
-        if not all(col in df.columns for col in column_mapping.keys()):
-            return f"El archivo no contiene las columnas esperadas. Columnas detectadas: {list(df.columns)}", 400
-        # Renombrar las columnas para estandarizarlas
-        df = df.rename(columns=column_mapping)
+        required_columns = ["Mes y Año", "Fecha_Vto", "Importe_Deuda"]
+        validate_dataframe(df, required_columns)
 
-        # Convertir la columna de fecha de vencimiento al formato datetime
         df["Fecha_Vto"] = pd.to_datetime(df["Fecha_Vto"], format="%d-%m-%Y", errors="coerce")
-        # Verificar si alguna fecha no es válida o está ausente
         if df["Fecha_Vto"].isnull().any():
-            return "Algunas fechas de vencimiento no son válidas o están ausentes.", 400
+            flash("Algunas fechas de vencimiento no son válidas o están ausentes.", "error")
+            return render_template_string(html_template)
 
-        # Función para calcular el número de días transcurridos
         def calcular_dias_transcurridos(row, tasa_row):
             f_desde = tasa_row["F_Desde"]
             f_hasta = tasa_row["F_Hasta_Inc."]
@@ -262,100 +264,70 @@ def process_file():
                 return None
 
             dias_transcurridos = (min(calc_date_global, f_hasta) - max(vencimiento, f_desde)).days + 1
-
             return max(0, dias_transcurridos)
 
-        # Inicializar la lista para almacenar columnas adicionales
         extra_columns = []
-        # Definir el nombre de la columna para el coeficiente acumulado
         coef_acumulado_col = 'Coef_Acumulado'
 
-        # Iterar sobre cada fila en el DataFrame de tasas
         for _, tasa_row in uploaded_tasa.iterrows():
             tasa_name = f"Cant_Días ({tasa_row['Tasa']})"
             extra_columns.append(tasa_name)
-
-            # Calcular el número de días transcurridos para cada fila en el DataFrame de deuda
             df[tasa_name] = df.apply(lambda row: calcular_dias_transcurridos(row, tasa_row), axis=1)
 
-        # Inicializar la columna de coeficiente acumulado
         df[coef_acumulado_col] = 0
-        # Calcular el coeficiente acumulado para cada fila
         for i in range(len(df)):
             for tasa_row in uploaded_tasa.itertuples():
                 tasa_name = f"Cant_Días ({tasa_row.Tasa})"
                 if not pd.isna(df.at[i, tasa_name]):
                     df.at[i, coef_acumulado_col] += (df.at[i, tasa_name] * tasa_row.Tasa) / 30
 
-        # Agregar la columna de coeficiente acumulado a la lista de columnas adicionales si no está presente
         if coef_acumulado_col not in extra_columns:
             extra_columns.append(coef_acumulado_col)
 
-        # Calcular el monto de intereses y la deuda actualizada
         df["Importe_Intereses"] = (df["Importe_Deuda"] * df[coef_acumulado_col]).round(2)
         df["Deuda_Actualizada"] = (df["Importe_Deuda"] + df["Importe_Intereses"]).round(2)
 
-        # Formatear las columnas Importe_Deuda, Importe_Intereses y Deuda_Actualizada
-        df["Importe_Deuda"] = df["Importe_Deuda"].apply(lambda x: "{:,.2f}".format(x).replace(",", "X").replace(".", ",").replace("X", "."))
-        df["Importe_Intereses"] = df["Importe_Intereses"].apply(lambda x: "{:,.2f}".format(x).replace(",", "X").replace(".", ",").replace("X", "."))
-        df["Deuda_Actualizada"] = df["Deuda_Actualizada"].apply(lambda x: "{:,.2f}".format(x).replace(",", "X").replace(".", ",").replace("X", "."))
+        df["Importe_Deuda"] = df["Importe_Deuda"].apply(format_number)
+        df["Importe_Intereses"] = df["Importe_Intereses"].apply(format_number)
+        df["Deuda_Actualizada"] = df["Deuda_Actualizada"].apply(format_number)
+        df[coef_acumulado_col] = df[coef_acumulado_col].apply(lambda x: "{:,.8f}".format(x).replace(".", ","))
 
-        # Reemplazar el punto por la coma en la columna coef_acumulado_col
-        df[coef_acumulado_col] = df[coef_acumulado_col].apply(lambda x: "{:,.8f}".format(x).replace(".", ","))  # coef redondeado a 8 decimales y coma como separador.
-
-        # Extraer el año de la columna "Mes y Año"
         df["Año"] = pd.to_datetime(df["Mes y Año"], format="%m-%Y", errors="coerce").dt.year
-        # Calcular subtotales por año
         subtotals = df.groupby("Año").agg(
             Subtotal_Importe_Deuda=("Importe_Deuda", lambda x: sum(float(val.replace(".", "").replace(",", ".")) for val in x)),
             Subtotal_Importe_Intereses=("Importe_Intereses", lambda x: sum(float(val.replace(".", "").replace(",", ".")) for val in x)),
             Subtotal_Deuda_Actualizada=("Deuda_Actualizada", lambda x: sum(float(val.replace(".", "").replace(",", ".")) for val in x))
         ).reset_index()
 
-        # Formatear los subtotales
-        subtotals["Subtotal_Importe_Deuda"] = subtotals["Subtotal_Importe_Deuda"].apply(lambda x: "{:,.2f}".format(x).replace(",", "X").replace(".", ",").replace("X", "."))
-        subtotals["Subtotal_Importe_Intereses"] = subtotals["Subtotal_Importe_Intereses"].apply(lambda x: "{:,.2f}".format(x).replace(",", "X").replace(".", ",").replace("X", "."))
-        subtotals["Subtotal_Deuda_Actualizada"] = subtotals["Subtotal_Deuda_Actualizada"].apply(lambda x: "{:,.2f}".format(x).replace(",", "X").replace(".", ",").replace("X", "."))
+        subtotals["Subtotal_Importe_Deuda"] = subtotals["Subtotal_Importe_Deuda"].apply(format_number)
+        subtotals["Subtotal_Importe_Intereses"] = subtotals["Subtotal_Importe_Intereses"].apply(format_number)
+        subtotals["Subtotal_Deuda_Actualizada"] = subtotals["Subtotal_Deuda_Actualizada"].apply(format_number)
 
-        # Calcular los totales generales
         totals = {
-            "Total_Importe_Deuda": "{:,.2f}".format(df["Importe_Deuda"].apply(lambda x: float(x.replace(".", "").replace(",", "."))).sum()).replace(",", "X").replace(".", ",").replace("X", "."),
-            "Total_Importe_Intereses": "{:,.2f}".format(df["Importe_Intereses"].apply(lambda x: float(x.replace(".", "").replace(",", "."))).sum()).replace(",", "X").replace(".", ",").replace("X", "."),
-            "Total_Deuda_Actualizada": "{:,.2f}".format(df["Deuda_Actualizada"].apply(lambda x: float(x.replace(".", "").replace(",", "."))).sum()).replace(",", "X").replace(".", ",").replace("X", ".")
+            "Total_Importe_Deuda": format_number(df["Importe_Deuda"].apply(lambda x: float(x.replace(".", "").replace(",", "."))).sum()),
+            "Total_Importe_Intereses": format_number(df["Importe_Intereses"].apply(lambda x: float(x.replace(".", "").replace(",", "."))).sum()),
+            "Total_Deuda_Actualizada": format_number(df["Deuda_Actualizada"].apply(lambda x: float(x.replace(".", "").replace(",", "."))).sum())
         }
 
-        # Formatear las columnas "Mes y Año" y "Fecha_Vto"
         df["Mes y Año"] = pd.to_datetime(df["Mes y Año"], errors="coerce").dt.strftime("%m-%Y")
         df["Fecha_Vto"] = df["Fecha_Vto"].dt.strftime("%d-%m-%Y")
 
-        # Convertir el DataFrame a una lista de diccionarios para renderizar en la plantilla
         data = df.to_dict(orient="records")
         subtotals = subtotals.to_dict(orient="records")
 
-        # Renderizar la plantilla con los datos procesados y la fecha de cálculo
         return render_template_string(html_template, data=data, extra_columns=extra_columns, subtotals=subtotals, totals=totals, calc_date=calc_date_global.strftime("%d-%m-%Y"))
-        # return render_template_string(html_template, data=data, extra_columns=extra_columns, subtotals=subtotals, totals=totals)
-    
     except Exception as e:
-        # Manejar cualquier error durante el procesamiento del archivo
-        return f"Error al procesar el archivo: {str(e)}", 400
+        logging.error(f"Error processing file: {str(e)}")
+        flash(f"Error al procesar el archivo: {str(e)}", "error")
+        return render_template_string(html_template)
 
-
-
-# Ruta para la página de inicio para los likes
-@app.route("/", methods=["GET"])
-def home():
-    if "likes_count" not in session:
-        session["likes_count"] = 0
-    return render_template_string(html_template, likes=session["likes_count"])
-
-# Ruta para manejar los likes
+# Route to handle likes
 @app.route("/like", methods=["POST"])
 def like():
     likes = session.get("likes_count", 0) + 1
     session["likes_count"] = likes
     return jsonify({"likes": likes})
 
-# Ejecutar la aplicación Flask
+# Run the application
 if __name__ == "__main__":
-    app.run(debug=True)
+    app.run(debug=os.getenv('DEBUG', 'False').lower() == 'true')
