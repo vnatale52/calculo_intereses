@@ -1,9 +1,10 @@
 # Import necessary libraries
-from flask import Flask, request, render_template_string, session, jsonify, flash
+from flask import Flask, request, render_template_string, session, jsonify, flash, g
 import pandas as pd
 from datetime import datetime
 import logging
 import os
+import sqlite3
 
 # Initialize the Flask application
 app = Flask(__name__)
@@ -13,6 +14,36 @@ app.secret_key = os.getenv('SECRET_KEY', 'default_secret_key')
 
 # Configure logging
 logging.basicConfig(level=logging.DEBUG)
+
+# Database configuration
+DATABASE = 'likes.db'
+
+def get_db():
+    db = getattr(g, '_database', None)
+    if db is None:
+        db = g._database = sqlite3.connect(DATABASE)
+    return db
+
+def init_db():
+    with app.app_context():
+        db = get_db()
+        cursor = db.cursor()
+        cursor.execute('''
+            CREATE TABLE IF NOT EXISTS likes (
+                user_id TEXT PRIMARY KEY,
+                likes INTEGER DEFAULT 0
+            )
+        ''')
+        db.commit()
+
+@app.teardown_appcontext
+def close_connection(exception):
+    db = getattr(g, '_database', None)
+    if db is not None:
+        db.close()
+
+# Initialize the database
+init_db()
 
 # Define the HTML template for the web application
 html_template = """
@@ -172,9 +203,13 @@ calc_date_global = None
 # Route for the home page
 @app.route("/", methods=["GET"])
 def home():
-    if "likes_count" not in session:
-        session["likes_count"] = 0
-    return render_template_string(html_template, likes=session["likes_count"])
+    user_id = session.get('user_id', 'default_user')
+    db = get_db()
+    cursor = db.cursor()
+    cursor.execute('SELECT likes FROM likes WHERE user_id = ?', (user_id,))
+    result = cursor.fetchone()
+    likes = result[0] if result else 0
+    return render_template_string(html_template, likes=likes)
 
 # Route to handle file upload for tasa data
 @app.route("/upload_tasa", methods=["POST"])
@@ -324,8 +359,14 @@ def process_file():
 # Route to handle likes
 @app.route("/like", methods=["POST"])
 def like():
-    likes = session.get("likes_count", 0) + 1
-    session["likes_count"] = likes
+    user_id = session.get('user_id', 'default_user')
+    db = get_db()
+    cursor = db.cursor()
+    cursor.execute('INSERT OR IGNORE INTO likes (user_id, likes) VALUES (?, 0)', (user_id,))
+    cursor.execute('UPDATE likes SET likes = likes + 1 WHERE user_id = ?', (user_id,))
+    db.commit()
+    cursor.execute('SELECT likes FROM likes WHERE user_id = ?', (user_id,))
+    likes = cursor.fetchone()[0]
     return jsonify({"likes": likes})
 
 # Run the application
