@@ -1,3 +1,5 @@
+#  MIT License  -  Copyright (c) 2025 Vincenzo Natale
+
 # Import necessary libraries
 from flask import Flask, request, render_template_string, session, jsonify, flash, g
 import pandas as pd
