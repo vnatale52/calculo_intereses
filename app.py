@@ -54,14 +54,14 @@ html_template = """
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="description" content="Application para el Cálculo de los Intereses Compensatorios o Resarcitorios AGIP - by Vincenzo Natale" />
+    <meta name="description" content="Application para el Cálculo de los Intereses Compensatorios o Resarcitorios para el Impuesto sobre los Ingresos Brutos de la CABA, AGIP - by Vincenzo Natale" />
 
-    <title>Web Application para el Cálculo de los Intereses Compensatorios</title>
+    <title>Web Application para el Cálculo de los Intereses Compensatorios o Resarcitorios</title>
     <h1>Web Application para el Cálculo de Intereses Compensatorios - Versión en Desarrollo desde el 26-01-2025, by VN.</h1>
     <p>Herramientas utilizadas: HTML, Python (librerías Flask y Pandas), Servidores GitHubPages y Render Web Hosting (que tarda varios segundos en correr) e IA ChatGPT y DeepSeek. </p>
     <p>En caso de reproceso, asegurarse que la URL sea sólo https://calculo-intereses.onrender.com (sin ninguna subruta a continuación de .com , de lo contrario, dará un error)</p>
 </head>
-<body style="background-color: grey;">
+<body style="background-color: powderblue;">
     <h1>Paso 1: Ingresa la Fecha hasta la cual (inclusive) los intereses serán calculados.</h1>
     <form action="/set_date" method="post">
         <label for="calc_date">Fecha de Cálculo:</label>
