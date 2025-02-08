@@ -170,7 +170,7 @@ html_template = """
         <p>Fecha de Cálculo {{ calc_date }} </p>
        {% endif %}
     
-    <p>Contacto: <a href="mailto:vnatale52@gmail.com">Enviar un correo electrónico a Vincenzo Natale </a></p>
+    <p>Contacto: <a href="mailto:vnatale52@gmail.com">Enviar un correo electrónico a Vincenzo Natale:   vnatale52@gmail.com  </a></p>
     <p>MIT License  -  Copyright (c) 2025 Vincenzo Natale </a></p>
     
     <button onclick="sendLike()">If it has been useful, give me a Like ❤️</button>
