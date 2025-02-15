@@ -54,7 +54,7 @@ html_template = """
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="description" content="Application para el Cálculo de los Intereses Compensatorios o Resarcitorios para el Impuesto sobre los Ingresos Brutos de la CABA, AGIP (no incluye Intereses Punitorios - by Vincenzo Natale" />
+    <meta name="description" content="Application para el Cálculo de los Intereses Compensatorios o Resarcitorios (no incluye Intereses Punitorios), para el Impuesto sobre los Ingresos Brutos de la CABA, AGIP - by Vincenzo Natale" />
 
     <title>Web Application para el Cálculo de los Intereses Compensatorios o Resarcitorios </title>
     <h1>Web Application para el Cálculo de Intereses Compensatorios o Resarcitorios para el Impuesto sobre los Ingresos Brutos de la AGIP de la CABA - Versión en Desarrollo desde el 26-01-2025, by VN.</h1>
