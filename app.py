@@ -1,7 +1,7 @@
-#  MIT License  -  Copyright (c) 2025 Vincenzo Natale
+# MIT License  -  Copyright (c) 2025 Vincenzo Natale
 
 # Import necessary libraries
-from flask import Flask, request, render_template_string, session, jsonify, flash, g
+from flask import Flask, request, render_template_string, session, jsonify, flash, g, redirect, url_for
 import pandas as pd
 from datetime import datetime
 import logging
@@ -56,10 +56,10 @@ html_template = """
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="description" content="Application para el Cálculo de los Intereses Compensatorios o Resarcitorios para el Impuesto sobre los Ingresos Brutos de la CABA, AGIP - by Vincenzo Natale" />
 
-    <title>Web Application para el Cálculo de los Intereses Compensatorios o Resarcitorios</title>
-    <h1>Web Application para el Cálculo de Intereses Compensatorios - Versión en Desarrollo desde el 26-01-2025, by VN.</h1>
+    <title>Web Application para el Cálculo de los Intereses Compensatorios o Resarcitorios </title>
+    <h1>Web Application para el Cálculo de Intereses Compensatorios o Resarcitorios para el Impuesto sobre los Ingresos Brutos de la AGIP de la CABA - Versión en Desarrollo desde el 26-01-2025, by VN.</h1>
     <p>Herramientas utilizadas: HTML, Python (librerías Flask y Pandas), Render Web Hosting (que tarda varios segundos en correr), IA ChatGPT y DeepSeek. </p>
-    <p>En caso de reproceso, asegurarse que la URL sea sólo https://calculo-intereses.onrender.com (sin ninguna subruta a continuación de .com , de lo contrario, dará un error)</p>
+    <!-- <p>En caso de reproceso, asegurarse que la URL sea sólo https://calculo-intereses.onrender.com (sin ninguna subruta a continuación de .com , de lo contrario, dará un error)</p> -->
 </head>
 <body style="background-color: powderblue;">
     <h1>Paso 1: Ingresa la Fecha hasta la cual (inclusive) los intereses serán calculados.</h1>
@@ -77,6 +77,7 @@ html_template = """
         <br><br>
         <button type="submit">Cargar Archivo</button>
     </form>
+    <p id="tasa_file_status">{{ tasa_file_status }}</p>
 
     <h1>Paso 3: Carga el archivo Deuda.xlsx. Los Títulos de las 3 columnas deben ser: Mes y Año, Fecha_Vto, Importe_Deuda.</h1>
     <p>La columna "Mes y Año" debe estar en el formato mm-yyyy, "Fecha_Vto" en formato dd-mm-yyyy y la coma debe ser el separador decimal.</p>
@@ -85,6 +86,7 @@ html_template = """
         <br><br>
         <button type="submit">Cargar Archivo</button>
     </form>
+    <p id="deuda_file_status">{{ deuda_file_status }}</p>
 
     {% if data %}
         <h2>Cálculo realizado:  Valor nominal de la deuda, Intereses compensatorios calculados y Deuda actualizada:</h2>
@@ -184,6 +186,16 @@ html_template = """
                 document.getElementById('likes').innerText = 'Likes: ' + data.likes;
             });
         }
+
+        // Update file selection status for Tasas.xlsx
+        document.querySelector('input[name="tasa_file"]').addEventListener('change', function() {
+            document.getElementById('tasa_file_status').innerText = 'A file has been selected.';
+        });
+
+        // Update file selection status for Deuda.xlsx
+        document.querySelector('input[name="excel_file"]').addEventListener('change', function() {
+            document.getElementById('deuda_file_status').innerText = 'A file has been selected.';
+        });
     </script>
 </body>
 </html>
@@ -211,7 +223,29 @@ def home():
     cursor.execute('SELECT likes FROM likes WHERE user_id = ?', (user_id,))
     result = cursor.fetchone()
     likes = result[0] if result else 0
-    return render_template_string(html_template, likes=likes)
+
+    # Retrieve calculation results from the session
+    data = session.pop('data', None)
+    extra_columns = session.pop('extra_columns', None)
+    subtotals = session.pop('subtotals', None)
+    totals = session.pop('totals', None)
+    calc_date = session.pop('calc_date', None)
+
+    # File selection status
+    tasa_file_status = session.pop('tasa_file_status', ' ')     # colocado ' '  en lugar de "File selected"
+    deuda_file_status = session.pop('deuda_file_status', ' ')   # colocado ' '  en lugar de "File selected"
+
+    return render_template_string(
+        html_template,
+        likes=likes,
+        data=data,
+        extra_columns=extra_columns,
+        subtotals=subtotals,
+        totals=totals,
+        calc_date=calc_date,
+        tasa_file_status=tasa_file_status,
+        deuda_file_status=deuda_file_status
+    )
 
 # Route to handle file upload for tasa data
 @app.route("/upload_tasa", methods=["POST"])
@@ -220,7 +254,7 @@ def upload_tasa_file():
     file = request.files["tasa_file"]
     if not file:
         flash("No se subió ningún archivo.", "error")
-        return render_template_string(html_template)
+        return redirect(url_for('home'))  # Redirect to home if no file is uploaded
 
     try:
         df_tasa = pd.read_excel(file)
@@ -233,18 +267,12 @@ def upload_tasa_file():
 
         uploaded_tasa = df_tasa
         flash("Archivo de tasas cargado exitosamente.", "success")
-        return render_template_string(
-            html_template,
-            tasa_data=df_tasa.assign(
-                F_Desde=df_tasa["F_Desde"].dt.strftime("%d-%m-%Y"),
-                F_Hasta_Inc=df_tasa["F_Hasta_Inc."].dt.strftime("%d-%m-%Y"),
-                Tasa=df_tasa["Tasa"].apply(lambda x: "{:,.4f}".format(x).replace(".", ","))
-            ).to_dict(orient="records")
-        )
+        session['tasa_file_status'] = 'A file has been selected.'  # Update file selection status
+        return redirect(url_for('home'))  # Redirect to home after successful upload
     except Exception as e:
         logging.error(f"Error processing tasa file: {str(e)}")
         flash(f"Error al procesar el archivo: {str(e)}", "error")
-        return render_template_string(html_template)
+        return redirect(url_for('home'))  # Redirect to home if there's an error
 
 # Route to set the calculation date
 @app.route("/set_date", methods=["POST"])
@@ -253,15 +281,15 @@ def set_date():
     calc_date = request.form.get("calc_date")
     if not calc_date:
         flash("No se proporcionó ninguna fecha.", "error")
-        return render_template_string(html_template)
+        return redirect(url_for('home'))  # Redirect to home if no date is provided
 
     try:
         calc_date_global = datetime.strptime(calc_date, "%Y-%m-%d")
         flash(f"Fecha de cálculo establecida: {calc_date_global.strftime('%d-%m-%Y')}", "success")
-        return render_template_string(html_template, calc_date=calc_date_global.strftime("%d-%m-%Y"))
+        return redirect(url_for('home'))  # Redirect to home after setting the date
     except ValueError:
         flash("Formato de fecha no válido.", "error")
-        return render_template_string(html_template)
+        return redirect(url_for('home'))  # Redirect to home if the date format is invalid
 
 # Route to process the uploaded debt file
 @app.route("/process", methods=["POST"])
@@ -271,15 +299,15 @@ def process_file():
 
     if not file:
         flash("No se cargó ningún archivo.", "error")
-        return render_template_string(html_template)
+        return redirect(url_for('home'))  # Redirect to home if no file is uploaded
 
     if uploaded_tasa is None:
         flash("No se ha cargado el archivo Tasa.xlsx.", "error")
-        return render_template_string(html_template)
+        return redirect(url_for('home'))  # Redirect to home if tasa file is not uploaded
 
     if calc_date_global is None:
         flash("No se ha establecido la fecha de cálculo.", "error")
-        return render_template_string(html_template)
+        return redirect(url_for('home'))  # Redirect to home if calculation date is not set
 
     try:
         df = pd.read_excel(file)
@@ -290,7 +318,7 @@ def process_file():
         df["Fecha_Vto"] = pd.to_datetime(df["Fecha_Vto"], format="%d-%m-%Y", errors="coerce")
         if df["Fecha_Vto"].isnull().any():
             flash("Algunas fechas de vencimiento no son válidas o están ausentes.", "error")
-            return render_template_string(html_template)
+            return redirect(url_for('home'))  # Redirect to home if there are invalid dates
 
         def calcular_dias_transcurridos(row, tasa_row):
             f_desde = tasa_row["F_Desde"]
@@ -349,14 +377,20 @@ def process_file():
         df["Mes y Año"] = pd.to_datetime(df["Mes y Año"], errors="coerce").dt.strftime("%m-%Y")
         df["Fecha_Vto"] = df["Fecha_Vto"].dt.strftime("%d-%m-%Y")
 
-        data = df.to_dict(orient="records")
-        subtotals = subtotals.to_dict(orient="records")
+        # Store the results in the session
+        session['data'] = df.to_dict(orient="records")
+        session['extra_columns'] = extra_columns
+        session['subtotals'] = subtotals.to_dict(orient="records")
+        session['totals'] = totals
+        session['calc_date'] = calc_date_global.strftime("%d-%m-%Y")
+        session['deuda_file_status'] = 'A file has been selected.'  # Update file selection status
 
-        return render_template_string(html_template, data=data, extra_columns=extra_columns, subtotals=subtotals, totals=totals, calc_date=calc_date_global.strftime("%d-%m-%Y"))
+        flash("Cálculo realizado exitosamente.", "success")
+        return redirect(url_for('home'))  # Redirect to home after successful processing
     except Exception as e:
         logging.error(f"Error processing file: {str(e)}")
         flash(f"Error al procesar el archivo: {str(e)}", "error")
-        return render_template_string(html_template)
+        return redirect(url_for('home'))  # Redirect to home if there's an error
 
 # Route to handle likes
 @app.route("/like", methods=["POST"])
