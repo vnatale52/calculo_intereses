@@ -49,151 +49,325 @@ init_db()
 
 # Define the HTML template for the web application
 html_template = """
+
 <!DOCTYPE html>
-<html>
+<html lang="es">
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="description" content="Application para el Cálculo de los Intereses Compensatorios o Resarcitorios (no incluye Intereses Punitorios), para el Impuesto sobre los Ingresos Brutos de la CABA, AGIP - by Vincenzo Natale" />
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Application para el Cálculo de los Intereses Compensatorios o Resarcitorios (no incluye Intereses Punitorios), para el Impuesto sobre los Ingresos Brutos de la CABA, AGIP - by Vincenzo Natale">
+    <title>Web Application para el Cálculo de los Intereses Compensatorios o Resarcitorios</title>
+    <style>
+        /* General Styles */
+        body {
+            font-family: Arial, sans-serif;
+            background: linear-gradient(135deg, #f4f4f9, #e0e0e7); /* New gradient background */
+            color: #333;
+            margin: 0;
+            padding: 0;
+            line-height: 1.2;
+        }
 
-    <title>Web Application para el Cálculo de los Intereses Compensatorios o Resarcitorios </title>
-    <h1>Web Application para el Cálculo de los Intereses Compensatorios o Resarcitorios (no incluye Intereses Punitorios), para el Impuesto sobre los Ingresos Brutos de la CABA, AGIP - by Vincenzo Natale"</h1>
-    <p>Herramientas utilizadas: HTML, Python (librerías Flask y Pandas), Render Web Hosting (que tarda varios segundos en correr), IA ChatGPT y DeepSeek. </p>
-    <!-- <p>En caso de reproceso, asegurarse que la URL sea sólo https://calculo-intereses.onrender.com (sin ninguna subruta a continuación de .com , de lo contrario, dará un error)</p> -->
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        h1, h2 {
+            color: #2c3e50;
+            text-align: center;
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+        }
+
+        h2 {
+            font-size: 2rem;
+            margin-top: 30px;
+            margin-bottom: 10px;
+        }
+
+        p {
+            font-size: 1.1rem;
+            margin-bottom: 10px;
+            text-align: center;
+        }
+
+        /* Form Styles */
+        form {
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            margin-bottom: 10px;
+        }
+
+        label {
+            display: block;
+            font-weight: bold;
+            margin-bottom: 10px;
+            color: #34495e;
+        }
+
+        input[type="date"],
+        input[type="file"] {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 15px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 1rem;
+        }
+
+        button[type="submit"] {
+            background-color: #3498db;
+            color: #fff;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        button[type="submit"]:hover {
+            background-color: #2980b9;
+        }
+
+        /* Table Styles */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+            background-color: #fff;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        th, td {
+            padding: 4px; /* Very compact padding */
+            text-align: right;
+            border: 1px solid #ddd;
+            font-size: 0.8rem; /* Smaller font size */
+            line-height: 1.1; /* Tighter line height */
+        }
+
+        th {
+            background-color: #3498db;
+            color: #fff;
+            font-weight: bold;
+        }
+
+        tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+
+        tr:hover {
+            background-color: #f1f1f1;
+        }
+          
+
+
+        /* File Status Messages */
+        #tasa_file_status, #deuda_file_status {
+            font-size: 0.9rem;
+            color: #27ae60;
+            margin-top: 10px;
+        }
+
+        /* Footer Styles */
+        .footer {
+            text-align: center;
+            margin-top: 40px;
+            padding: 20px;
+            background-color: #2c3e50;
+            color: #fff;
+            border-radius: 8px;
+        }
+
+        .footer a {
+            color: #3498db;
+            text-decoration: none;
+        }
+
+        .footer a:hover {
+            text-decoration: underline;
+        }
+
+        /* Like Button Styles */
+        #likes {
+            font-size: 1.2rem;
+            color: #3498db;
+            margin-top: 20px;
+        }
+
+        button#likeButton {
+            background-color: #9874ff ;  
+            color: #fff;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        button#likeButton:hover {
+            background-color: #c0392b;
+        }
+    </style>
 </head>
-<body style="background-color: powderblue;">
-    <h1>Paso 1: Ingresa la Fecha hasta la cual (inclusive) los intereses serán calculados.</h1>
-    <form action="/set_date" method="post">
-        <label for="calc_date">Fecha de Cálculo:</label>
-        <input type="date" name="calc_date" required>
-        <br><br>
-        <button type="submit">Establecer Fecha de Cálculo</button>
-    </form>
+<body>
+    <div class="container">
+        <h1>Web Application para el Cálculo de los Intereses Compensatorios o Resarcitorios</h1>
+        <p>Herramientas utilizadas: HTML, Python (librerías Flask y Pandas), Render Web Hosting, IA ChatGPT y DeepSeek.</p>
 
-    <h1>Paso 2: Carga el archivo Tasas.xlsx. Los Títulos de las 3 columnas deben ser: F_Desde, F_Hasta_Inc., Tasa.</h1>
-    <p>Las fechas deben estar en el formato dd-mm-yyyy y la tasa nominal mensual debe estar expresada en tanto por uno, para 30 días de plazo; el denominador utilizado es siempre 30 días y no hay capitalización de intereses.</p>
-    <form action="/upload_tasa" method="post" enctype="multipart/form-data">
-        <input type="file" name="tasa_file" accept=".xlsx" required>
-        <br><br>
-        <button type="submit">Cargar Archivo</button>
-    </form>
-    <p id="tasa_file_status">{{ tasa_file_status }}</p>
+        <!-- Step 1: Set Calculation Date -->
+        <div>
+            <h2>Paso 1: Ingresa la Fecha hasta la cual (inclusive) los intereses serán calculados.</h2>
+            <form action="/set_date" method="post">
+                <label for="calc_date">Fecha de Cálculo:</label>
+                <input type="date" name="calc_date" required>
+                <button type="submit">Establecer Fecha de Cálculo</button>
+            </form>
+        </div>
 
-    <h1>Paso 3: Carga el archivo Deuda.xlsx. Los Títulos de las 3 columnas deben ser: Mes y Año, Fecha_Vto, Importe_Deuda.</h1>
-    <p>La columna "Mes y Año" debe estar en el formato mm-yyyy, "Fecha_Vto" en formato dd-mm-yyyy y la coma debe ser el separador decimal.</p>
-    <form action="/process" method="post" enctype="multipart/form-data">
-        <input type="file" name="excel_file" accept=".xlsx" required>
-        <br><br>
-        <button type="submit">Cargar Archivo</button>
-    </form>
-    <p id="deuda_file_status">{{ deuda_file_status }}</p>
+        <!-- Step 2: Upload Tasa File -->
+        <div>
+            <h2>Paso 2: Carga el archivo Tasas.xlsx</h2>
+            <p>Los títulos de las 3 columnas y su formato, por ejemplo, deben ser : F_Desde 01-01-2025   ,  F_Hasta_Inc. 30-06-2025  ,  Tasa 0,035700
+.</p>
+            <form action="/upload_tasa" method="post" enctype="multipart/form-data">
+                <input type="file" name="tasa_file" accept=".xlsx" required>
+                <button type="submit">Cargar Archivo</button>
+            </form>
+            <p id="tasa_file_status">{{ tasa_file_status }}</p>
+        </div>
 
-    {% if data %}
-        <h2>Cálculo realizado:  Valor nominal de la deuda, Intereses compensatorios calculados y Deuda actualizada:</h2>
-        <h2>Fecha de Cálculo, inclusive : {{ calc_date }}</h2>
-        <p>Mediante un simple "Copy and Paste" se puede exportar su contenido a una WorkSheet. También, se puede generar una salida a PDF para su impresión.</p>
-        <table border="1">
-            <tr>
-                <th>Mes y Año</th>
-                <th>Fecha_Vto</th>
-                <th>Importe_Deuda</th>
-                {% for column in extra_columns %}
-                <th>{{ column }}</th>
+        <!-- Step 3: Upload Deuda File -->
+        <div>
+            <h2>Paso 3: Carga el archivo Deuda.xlsx</h2>
+            <p>Los títulos de las 3 columnas y su formato, por ejemplo, deben ser : Mes y Año 01-11-2022  ,  Fecha_Vto 16-12-2022  ,  Importe_Deuda 2845086,27  (sin puntos y con coma para decimales)
+.</p>
+            <form action="/process" method="post" enctype="multipart/form-data">
+                <input type="file" name="excel_file" accept=".xlsx" required>
+                <button type="submit">Cargar Archivo</button>
+            </form>
+            <p id="deuda_file_status">{{ deuda_file_status }}</p>
+        </div>
+
+        <!-- Calculation Results -->
+        {% if data %}
+            <h2>Cálculo realizado: Valor nominal de la deuda, Intereses compensatorios y Deuda actualizada</h2>
+            <h2>Fecha de Cálculo, inclusive: {{ calc_date }}</h2>
+            <table>
+                <tr>
+                    <th>Mes y Año</th>
+                    <th>Fecha_Vto</th>
+                    <th>Importe_Deuda</th>
+                    {% for column in extra_columns %}
+                    <th>{{ column }}</th>
+                    {% endfor %}
+                    <th>Importe_Intereses</th>
+                    <th>Deuda_Actualizada</th>
+                </tr>
+                {% for row in data %}
+                <tr>
+                    <td>{{ row['Mes y Año'] }}</td>
+                    <td>{{ row['Fecha_Vto'] }}</td>
+                    <td>{{ row['Importe_Deuda'] }}</td>
+                    {% for column in extra_columns %}
+                    <td>{{ row[column] }}</td>
+                    {% endfor %}
+                    <td>{{ row['Importe_Intereses'] }}</td>
+                    <td>{{ row['Deuda_Actualizada'] }}</td>
+                </tr>
                 {% endfor %}
-                <th>Importe_Intereses</th>
-                <th>Deuda_Actualizada</th>
-            </tr>
-            {% for row in data %}
-            <tr>
-                <td style="text-align: right;">{{ row['Mes y Año'] }}</td>
-                <td style="text-align: right;">{{ row['Fecha_Vto'] }}</td>
-                <td style="text-align: right;">{{ row['Importe_Deuda'] }}</td>
-                {% for column in extra_columns %}
-                <td style="text-align: right;">{{ row[column] }}</td>
+            </table>
+
+            <h2>Subtotales por Año</h2>
+            <table>
+                <tr>
+                    <th>Año</th>
+                    <th>Subtotal Importe_Deuda</th>
+                    <th>Subtotal Importe_Intereses</th>
+                    <th>Subtotal Deuda_Actualizada</th>
+                </tr>
+                {% for row in subtotals %}
+                <tr>
+                    <td>{{ row['Año'] }}</td>
+                    <td>{{ row['Subtotal_Importe_Deuda'] }}</td>
+                    <td>{{ row['Subtotal_Importe_Intereses'] }}</td>
+                    <td>{{ row['Subtotal_Deuda_Actualizada'] }}</td>
+                </tr>
                 {% endfor %}
-                <td style="text-align: right;">{{ row['Importe_Intereses'] }}</td>
-                <td style="text-align: right;">{{ row['Deuda_Actualizada'] }}</td>
-            </tr>
-            {% endfor %}
-        </table>
+            </table>
 
-        <h2>Subtotales por Año</h2>
-        <table border="1">
-            <tr>
-                <th>Año</th>
-                <th>Subtotal Importe_Deuda</th>
-                <th>Subtotal Importe_Intereses</th>
-                <th>Subtotal Deuda_Actualizada</th>
-            </tr>
-            {% for row in subtotals %}
-            <tr>
-                <td style="text-align: right;">{{ row['Año'] }}</td>
-                <td style="text-align: right;">{{ row['Subtotal_Importe_Deuda'] }}</td>
-                <td style="text-align: right;">{{ row['Subtotal_Importe_Intereses'] }}</td>
-                <td style="text-align: right;">{{ row['Subtotal_Deuda_Actualizada'] }}</td>
-            </tr>
-            {% endfor %}
-        </table>
+            <h2>Total General</h2>
+            <table>
+                <tr>
+                    <th>Total Importe_Deuda</th>
+                    <th>Total Importe_Intereses</th>
+                    <th>Total Deuda_Actualizada</th>
+                </tr>
+                <tr>
+                    <td>{{ totals['Total_Importe_Deuda'] }}</td>
+                    <td>{{ totals['Total_Importe_Intereses'] }}</td>
+                    <td>{{ totals['Total_Deuda_Actualizada'] }}</td>
+                </tr>
+            </table>
+        {% endif %}
 
-        <h2>Total General</h2>
-        <table border="1">
-            <tr>
-                <th>Total Importe_Deuda</th>
-                <th>Total Importe_Intereses</th>
-                <th>Total Deuda_Actualizada</th>
-            </tr>
-            <tr>
-                <td style="text-align: right;">{{ totals['Total_Importe_Deuda'] }}</td>
-                <td style="text-align: right;">{{ totals['Total_Importe_Intereses'] }}</td>
-                <td style="text-align: right;">{{ totals['Total_Deuda_Actualizada'] }}</td>
-            </tr>
-        </table>
-    {% endif %}
+        <!-- Tasa Data Display -->
+        {% if tasa_data %}
+            <h2>Datos del Archivo Tasas.xlsx (tasa expresada en tanto por uno)</h2>
+            <table>
+                <tr>
+                    <th>F_Desde</th>
+                    <th>F_Hasta_Inc.</th>
+                    <th>Tasa</th>
+                </tr>
+                {% for row in tasa_data %}
+                <tr>
+                    <td>{{ row['F_Desde'] }}</td>
+                    <td>{{ row['F_Hasta_Inc'] }}</td>
+                    <td>{{ row['Tasa'] }}</td>
+                </tr>
+                {% endfor %}
+            </table>
+        {% endif %}
 
-    {% if tasa_data %}
-        <h2>Datos del Archivo Tasas.xlsx (tasa expresada en tanto por uno).</h2>
-        <table border="1">
-            <tr>
-                <th>F_Desde</th>
-                <th>F_Hasta_Inc.</th>
-                <th>Tasa</th>
-            </tr>
-            {% for row in tasa_data %}
-            <tr>
-                <td style="text-align: right;">{{ row['F_Desde'] }}</td>
-                <td style="text-align: right;">{{ row['F_Hasta_Inc'] }}</td>
-                <td style="text-align: right;">{{ row['Tasa'] }}</td>
-            </tr>
-            {% endfor %}
-        </table>
-    {% endif %}
+        <!-- Like Button -->
+        <div>
+            <button id="likeButton" onclick="sendLike()">If this app has been useful to you, then I deserve a Like ❤️</button>
+            <p id="likes">Likes: {{ likes }}</p>
+        </div>
 
-    {% if calc_date %}
-        <p>Fecha de Cálculo {{ calc_date }} </p>
-       {% endif %}
-    
-    <p>Contacto: <a href="mailto:vnatale52@gmail.com">Enviar un correo electrónico a Vincenzo Natale:   vnatale52@gmail.com  </a></p>
-    <p>MIT License  -  Copyright (c) 2025 Vincenzo Natale </a></p>
-    
-    <button onclick="sendLike()">If this app has been useful to you, then I deserve a Like ❤️</button>
-    <p id="likes">Likes: {{ likes }}</p>
-    
+        <!-- Footer -->
+        <div class="footer">
+            <p>Contacto: <a href="mailto:vnatale52@gmail.com">Enviar un correo electrónico a Vincenzo Natale: vnatale52@gmail.com</a></p>
+            <p>MIT License - Copyright (c) 2025 Vincenzo Natale</p>
+        </div>
+    </div>
+
     <script>
         function sendLike() {
-            fetch('/like', {method: 'POST'})
-            .then(response => response.json())
-            .then(data => {
-                document.getElementById('likes').innerText = 'Likes: ' + data.likes;
-            });
+            fetch('/like', { method: 'POST' })
+                .then(response => response.json())
+                .then(data => {
+                    document.getElementById('likes').innerText = 'Likes: ' + data.likes;
+                });
         }
 
         // Update file selection status for Tasas.xlsx
-        document.querySelector('input[name="tasa_file"]').addEventListener('change', function() {
+        document.querySelector('input[name="tasa_file"]').addEventListener('change', function () {
             document.getElementById('tasa_file_status').innerText = 'A file has been selected.';
         });
 
         // Update file selection status for Deuda.xlsx
-        document.querySelector('input[name="excel_file"]').addEventListener('change', function() {
+        document.querySelector('input[name="excel_file"]').addEventListener('change', function () {
             document.getElementById('deuda_file_status').innerText = 'A file has been selected.';
         });
     </script>
