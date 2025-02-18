@@ -221,8 +221,8 @@ html_template = """
 </head>
 <body>
     <div class="container">
-        <h1>Web Application para el Cálculo de los Intereses Compensatorios o Resarcitorios</h1>
-        <p>Herramientas utilizadas: HTML, Python (librerías Flask y Pandas), Render Web Hosting, IA ChatGPT y DeepSeek.</p>
+        <h1>Web Application para el Cálculo de los Intereses Compensatorios o Resarcitorios (no incluye Intereses Punitorios), para el Impuesto sobre los Ingresos Brutos</h1>
+        <p>Herramientas utilizadas: HTML, CSS, Python (librerías Flask y Pandas), Render Web Hosting, IA ChatGPT y DeepSeek.</p>
 
         <!-- Step 1: Set Calculation Date -->
         <div>
@@ -237,8 +237,7 @@ html_template = """
         <!-- Step 2: Upload Tasa File -->
         <div>
             <h2>Paso 2: Carga el archivo Tasas.xlsx</h2>
-            <p>Los títulos de las 3 columnas y su formato, por ejemplo, deben ser : F_Desde 01-01-2025   ,  F_Hasta_Inc. 30-06-2025  ,  Tasa 0,035700
-.</p>
+            <p>Los títulos de las 3 columnas y su formato, por ejemplo, deben ser : F_Desde 01-01-2025   ,  F_Hasta_Inc. 30-06-2025  ,  Tasa 0,035700 : La tasa debe estar expresada en tanto por uno para 30 días de plazo, el denominador utilizado es siempre 30 días y no hay capitalización de intereses.</p>
             <form action="/upload_tasa" method="post" enctype="multipart/form-data">
                 <input type="file" name="tasa_file" accept=".xlsx" required>
                 <button type="submit">Cargar Archivo</button>
@@ -249,8 +248,7 @@ html_template = """
         <!-- Step 3: Upload Deuda File -->
         <div>
             <h2>Paso 3: Carga el archivo Deuda.xlsx</h2>
-            <p>Los títulos de las 3 columnas y su formato, por ejemplo, deben ser : Mes y Año 01-11-2022  ,  Fecha_Vto 16-12-2022  ,  Importe_Deuda 2845086,27  (sin puntos y con coma para decimales)
-.</p>
+            <p>Los títulos de las 3 columnas y su formato, por ejemplo, deben ser : Mes y Año 01-11-2022  ,  Fecha_Vto 16-12-2022  ,  Importe_Deuda 2845086,27  (sin puntos y con coma para decimales) </p>
             <form action="/process" method="post" enctype="multipart/form-data">
                 <input type="file" name="excel_file" accept=".xlsx" required>
                 <button type="submit">Cargar Archivo</button>
@@ -262,6 +260,7 @@ html_template = """
         {% if data %}
             <h2>Cálculo realizado: Valor nominal de la deuda, Intereses compensatorios y Deuda actualizada</h2>
             <h2>Fecha de Cálculo, inclusive: {{ calc_date }}</h2>
+            <p>Mediante un simple "Copy and Paste" se puede exportar su contenido a una WorkSheet. También, se puede generar una salida a PDF, previo formateo de la página, para su impresión</p>
             <table>
                 <tr>
                     <th>Mes y Año</th>
@@ -341,13 +340,13 @@ html_template = """
 
         <!-- Like Button -->
         <div>
-            <button id="likeButton" onclick="sendLike()">If this app has been useful to you, then I deserve a Like ❤️</button>
+            <button id="likeButton" onclick="sendLike()">If this app has been useful to you, then I deserve a Like. That's all I wish from you ❤️</button>
             <p id="likes">Likes: {{ likes }}</p>
         </div>
 
         <!-- Footer -->
         <div class="footer">
-            <p>Contacto: <a href="mailto:vnatale52@gmail.com">Enviar un correo electrónico a Vincenzo Natale: vnatale52@gmail.com</a></p>
+            <p>Contacto: <a href="mailto:vnatale52@gmail.com">Para comentarios, sugerencias, detección de errores, etc., envía un correo electrónico a Vincenzo Natale : vnatale52@gmail.com</a></p>
             <p>MIT License - Copyright (c) 2025 Vincenzo Natale</p>
         </div>
     </div>
