@@ -1,0 +1,173 @@
+/* General Styles */
+body {
+    font-family: Arial, sans-serif;
+    background: linear-gradient(135deg, #f4f4f9, #e0e0e7); /* New gradient background */
+    color: #333;
+    margin: 0;
+    padding: 0;
+    line-height: 1.2;
+}
+
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+h1, h2 {
+    color: #2c3e50;
+    text-align: center;
+}
+
+h1 {
+    font-size: 2.5rem;
+    margin-bottom: 10px;
+}
+
+h2 {
+    font-size: 2rem;
+    margin-top: 30px;
+    margin-bottom: 10px;
+}
+
+p {
+    font-size: 1.1rem;
+    margin-bottom: 10px;
+    text-align: center;
+}
+
+/* Form Styles */
+form {
+    background-color: #fff;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    margin-bottom: 10px;
+}
+
+label {
+    display: block;
+    font-weight: bold;
+    margin-bottom: 10px;
+    color: #34495e;
+}
+
+input[type="date"],
+input[type="file"] {
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 15px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 1rem;
+}
+
+button[type="submit"] {
+    background-color: #3498db;
+    color: #fff;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 4px;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+button[type="submit"]:hover {
+    background-color: #2980b9;
+}
+
+/* Table Styles */
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 20px;
+    background-color: #fff;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+th, td {
+    padding: 4px; /* Very compact padding */
+    text-align: right;
+    border: 1px solid #ddd;
+    font-size: 0.8rem; /* Smaller font size */
+    line-height: 1.1; /* Tighter line height */
+}
+
+th {
+    background-color: #3498db;
+    color: #fff;
+    font-weight: bold;
+}
+
+tr:nth-child(even) {
+    background-color: #f9f9f9;
+}
+
+tr:hover {
+    background-color: #f1f1f1;
+}
+
+/* File Status Messages */
+#tasa_file_status, #deuda_file_status {
+    font-size: 0.9rem;
+    color: #27ae60;
+    margin-top: 10px;
+}
+
+/* Footer Styles */
+.footer {
+    text-align: center;
+    margin-top: 40px;
+    padding: 20px;
+    background-color: #2c3e50;
+    color: #fff;
+    border-radius: 8px;
+}
+
+.footer a {
+    color: #3498db;
+    text-decoration: none;
+}
+
+.footer a:hover {
+    text-decoration: underline;
+}
+
+/* Like Button Styles */
+#likes {
+    font-size: 1.2rem;
+    color: #3498db;
+    margin-top: 20px;
+}
+
+button#likeButton {
+    background-color: #9874ff ;  
+    color: #fff;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 4px;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+button#likeButton:hover {
+    background-color: #c0392b;
+}
+
+/* Export Button Styles */
+button#exportButton {
+    background-color: #4CAF50; /* Green */
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 4px;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+button#exportButton:hover {
+    background-color: #45a049;
+}
