@@ -1,12 +1,13 @@
 # MIT License  -  Copyright (c) 2025 Vincenzo Natale
 
 # Import necessary libraries
-from flask import Flask, request, render_template_string, session, jsonify, flash, g, redirect, url_for
+from flask import Flask, request, render_template_string, session, jsonify, flash, g, redirect, url_for, send_file
 import pandas as pd
 from datetime import datetime
 import logging
 import os
 import sqlite3
+from io import BytesIO
 
 # Initialize the Flask application
 app = Flask(__name__)
@@ -49,7 +50,6 @@ init_db()
 
 # Define the HTML template for the web application
 html_template = """
-
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -167,8 +167,6 @@ html_template = """
         tr:hover {
             background-color: #f1f1f1;
         }
-          
-
 
         /* File Status Messages */
         #tasa_file_status, #deuda_file_status {
@@ -217,12 +215,28 @@ html_template = """
         button#likeButton:hover {
             background-color: #c0392b;
         }
+
+        /* Export Button Styles */
+        button#exportButton {
+            background-color: #4CAF50; /* Green */
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        button#exportButton:hover {
+            background-color: #45a049;
+        }
     </style>
 </head>
 <body>
     <div class="container">
         <h1>Web Application para el Cálculo de los Intereses Compensatorios o Resarcitorios (no incluye Intereses Punitorios), para el Impuesto sobre los Ingresos Brutos</h1>
-        <p>Herramientas utilizadas: HTML, CSS, Python (librerías Flask y Pandas), Render Web Hosting, IA ChatGPT y DeepSeek.</p>
+        <p>Herramientas utilizadas: HTML, CSS, Python (librerías Flask y Pandas), Render Web Hosting (que tarda unos segundos), IA ChatGPT y DeepSeek.</p>
 
         <!-- Step 1: Set Calculation Date -->
         <div>
@@ -237,7 +251,7 @@ html_template = """
         <!-- Step 2: Upload Tasa File -->
         <div>
             <h2>Paso 2: Carga el archivo Tasas.xlsx</h2>
-            <p>Los títulos de las 3 columnas y su formato, por ejemplo, deben ser : F_Desde 01-01-2025   ,  F_Hasta_Inc. 30-06-2025  ,  Tasa 0,035700 : La tasa debe estar expresada en tanto por uno para 30 días de plazo, el denominador utilizado es siempre 30 días y no hay capitalización de intereses.</p>
+            <p>Los títulos de las 3 columnas y su formato, por ejemplo, deben ser : F_Desde 01-01-2025   ,  F_Hasta_Inc. 30-06-2025  ,  Tasa 0,035700 . La tasa debe estar expresada en tanto por uno para 30 días de plazo, el denominador utilizado es siempre 30 días y no hay capitalización de intereses.</p>
             <form action="/upload_tasa" method="post" enctype="multipart/form-data">
                 <input type="file" name="tasa_file" accept=".xlsx" required>
                 <button type="submit">Cargar Archivo</button>
@@ -317,6 +331,11 @@ html_template = """
                     <td>{{ totals['Total_Deuda_Actualizada'] }}</td>
                 </tr>
             </table>
+
+            <!-- Export Button -->
+            <div>
+                <button id="exportButton" onclick="exportToExcel()">Exportar a hoja de cálculo. Editar con LibreOffice Calc</button>
+            </div>
         {% endif %}
 
         <!-- Tasa Data Display -->
@@ -360,6 +379,20 @@ html_template = """
                 });
         }
 
+        function exportToExcel() {
+            fetch('/export', { method: 'POST' })
+                .then(response => response.blob())
+                .then(blob => {
+                    const url = window.URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = 'Calculo_Intereses.xlsx';
+                    document.body.appendChild(a);
+                    a.click();
+                    window.URL.revokeObjectURL(url);
+                });
+        }
+
         // Update file selection status for Tasas.xlsx
         document.querySelector('input[name="tasa_file"]').addEventListener('change', function () {
             document.getElementById('tasa_file_status').innerText = 'A file has been selected.';
@@ -398,15 +431,16 @@ def home():
     likes = result[0] if result else 0
 
     # Retrieve calculation results from the session
-    data = session.pop('data', None)
-    extra_columns = session.pop('extra_columns', None)
-    subtotals = session.pop('subtotals', None)
-    totals = session.pop('totals', None)
-    calc_date = session.pop('calc_date', None)
+    data = session.get('data', None)
+    extra_columns = session.get('extra_columns', None)
+    subtotals = session.get('subtotals', None)
+    totals = session.get('totals', None)
+    calc_date = session.get('calc_date', None)
+    tasa_data = session.get('tasa_data', None)
 
     # File selection status
-    tasa_file_status = session.pop('tasa_file_status', ' ')     # colocado ' '  en lugar de "File selected"
-    deuda_file_status = session.pop('deuda_file_status', ' ')   # colocado ' '  en lugar de "File selected"
+    tasa_file_status = session.get('tasa_file_status', ' ')     # colocado ' '  en lugar de "File selected"
+    deuda_file_status = session.get('deuda_file_status', ' ')   # colocado ' '  en lugar de "File selected"
 
     return render_template_string(
         html_template,
@@ -417,7 +451,8 @@ def home():
         totals=totals,
         calc_date=calc_date,
         tasa_file_status=tasa_file_status,
-        deuda_file_status=deuda_file_status
+        deuda_file_status=deuda_file_status,
+        tasa_data=tasa_data
     )
 
 # Route to handle file upload for tasa data
@@ -441,6 +476,7 @@ def upload_tasa_file():
         uploaded_tasa = df_tasa
         flash("Archivo de tasas cargado exitosamente.", "success")
         session['tasa_file_status'] = 'A file has been selected.'  # Update file selection status
+        session['tasa_data'] = df_tasa.to_dict(orient="records")  # Store tasa data in session
         return redirect(url_for('home'))  # Redirect to home after successful upload
     except Exception as e:
         logging.error(f"Error processing tasa file: {str(e)}")
@@ -577,6 +613,43 @@ def like():
     cursor.execute('SELECT likes FROM likes WHERE user_id = ?', (user_id,))
     likes = cursor.fetchone()[0]
     return jsonify({"likes": likes})
+
+# Route to export data to Excel
+@app.route("/export", methods=["POST"])
+def export_to_excel():
+    try:
+        # Retrieve data from the session
+        data = session.get('data', None)
+        subtotals = session.get('subtotals', None)
+        totals = session.get('totals', None)
+        tasa_data = session.get('tasa_data', None)
+
+        if not data or not subtotals or not totals or not tasa_data:
+            flash("No hay datos para exportar.", "error")
+            return redirect(url_for('home'))
+
+        # Convert session data back to DataFrames
+        df_data = pd.DataFrame(data)
+        df_subtotals = pd.DataFrame(subtotals)
+        df_totals = pd.DataFrame([totals])
+        df_tasa = pd.DataFrame(tasa_data)
+
+        # Create a BytesIO buffer to store the Excel file
+        output = BytesIO()
+        with pd.ExcelWriter(output, engine='xlsxwriter') as writer:
+            df_data.to_excel(writer, sheet_name='Calculo_Intereses', index=False)
+            df_subtotals.to_excel(writer, sheet_name='Subtotales', index=False)
+            df_totals.to_excel(writer, sheet_name='Totales', index=False)
+            df_tasa.to_excel(writer, sheet_name='Tasas', index=False)
+
+        output.seek(0)
+
+        # Return the Excel file as a response
+        return send_file(output, as_attachment=True, download_name='Calculo_Intereses.xlsx', mimetype='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+    except Exception as e:
+        logging.error(f"Error exporting to Excel: {str(e)}")
+        flash(f"Error al exportar a Excel: {str(e)}", "error")
+        return redirect(url_for('home'))
 
 # Run the application
 if __name__ == "__main__":
