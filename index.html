@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Application para el Cálculo de los Intereses Compensatorios o Resarcitorios (no incluye Intereses Punitorios), para el Impuesto sobre los Ingresos Brutos de la CABA, AGIP - by Vincenzo Natale">
+    <title>Web Application para el Cálculo de los Intereses Compensatorios o Resarcitorios</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<body>
+    <div class="container">
+        <h1>Web Application para el Cálculo de los Intereses Compensatorios o Resarcitorios (no incluye Intereses Punitorios), para el Impuesto sobre los Ingresos Brutos</h1>
+        <p>Herramientas utilizadas: HTML, CSS, Python (librerías Flask y Pandas), Render Web Hosting (que tarda unos segundos), IA ChatGPT y DeepSeek.</p>
+
+        <!-- Step 1: Set Calculation Date -->
+        <div>
+            <h2>Paso 1: Ingresa la Fecha hasta la cual (inclusive) los intereses serán calculados.</h2>
+            <form action="/set_date" method="post">
+                <label for="calc_date">Fecha de Cálculo:</label>
+                <input type="date" name="calc_date" required>
+                <button type="submit">Establecer Fecha de Cálculo</button>
+            </form>
+        </div>
+
+        <!-- Step 2: Upload Tasa File -->
+        <div>
+            <h2>Paso 2: Carga el archivo Tasas.xlsx</h2>
+            <p> Los títulos de las 3 columnas deben ser necesariamente:  F_Desde  ,  F_Hasta_Inc. ,  Tasa  y en la fila subsiguiente deben colocarse los datos como se indica en la imágen adjunta. La tasa debe estar expresada en tanto por uno, para 30 días de plazo, el denominador utilizado es siempre 30 días y no hay capitalización de intereses.</p>
+            
+            <img src="{{ 'static/estructura_archivos.JPG' }}" alt="Imágen de la estructura de los archivos" width="265" height="100">
+            
+            
+            <form action="/upload_tasa" method="post" enctype="multipart/form-data">
+                <input type="file" name="tasa_file" accept=".xlsx" required>
+                <button type="submit">Cargar Archivo</button>
+            </form>
+            <p id="tasa_file_status">{{ tasa_file_status }}</p>
+        </div>
+
+        <!-- Step 3: Upload Deuda File -->
+        <div>
+            <h2>Paso 3: Carga el archivo Deuda.xlsx</h2>
+            <p> Los títulos de las 3 columnas deben ser necesariamente:  Mes y Año  ,  Fecha_Vto  ,  Importe_Deuda   y en la fila subsiguiente deben colocarse los datos como se indica en la imágen adjunta (sin puntos y utilizando coma para decimales) </p>
+            <form action="/process" method="post" enctype="multipart/form-data">
+                <input type="file" name="excel_file" accept=".xlsx" required>
+                <button type="submit">Cargar Archivo</button>
+            </form>
+            <p id="deuda_file_status">{{ deuda_file_status }}</p>
+        </div>
+
+        <!-- Calculation Results -->
+        {% if data %}
+            <h2>Cálculo realizado: Valor nominal de la deuda, Intereses compensatorios y Deuda actualizada</h2>
+            <h2>Fecha de Cálculo, inclusive: {{ calc_date }}</h2>
+            <p>Mediante un simple "Copy and Paste" se puede exportar su contenido a una WorkSheet. También, se puede generar una salida a PDF, previo formateo de la página, para su impresión</p>
+            <table>
+                <tr>
+                    <th>Mes y Año</th>
+                    <th>Fecha_Vto</th>
+                    <th>Importe_Deuda</th>
+                    {% for column in extra_columns %}
+                    <th>{{ column }}</th>
+                    {% endfor %}
+                    <th>Importe_Intereses</th>
+                    <th>Deuda_Actualizada</th>
+                </tr>
+                {% for row in data %}
+                <tr>
+                    <td>{{ row['Mes y Año'] }}</td>
+                    <td>{{ row['Fecha_Vto'] }}</td>
+                    <td>{{ row['Importe_Deuda'] }}</td>
+                    {% for column in extra_columns %}
+                    <td>{{ row[column] }}</td>
+                    {% endfor %}
+                    <td>{{ row['Importe_Intereses'] }}</td>
+                    <td>{{ row['Deuda_Actualizada'] }}</td>
+                </tr>
+                {% endfor %}
+            </table>
+
+            <h2>Subtotales por Año</h2>
+            <table>
+                <tr>
+                    <th>Año</th>
+                    <th>Subtotal Importe_Deuda</th>
+                    <th>Subtotal Importe_Intereses</th>
+                    <th>Subtotal Deuda_Actualizada</th>
+                </tr>
+                {% for row in subtotals %}
+                <tr>
+                    <td>{{ row['Año'] }}</td>
+                    <td>{{ row['Subtotal_Importe_Deuda'] }}</td>
+                    <td>{{ row['Subtotal_Importe_Intereses'] }}</td>
+                    <td>{{ row['Subtotal_Deuda_Actualizada'] }}</td>
+                </tr>
+                {% endfor %}
+            </table>
+
+            <h2>Total General</h2>
+            <table>
+                <tr>
+                    <th>Total Importe_Deuda</th>
+                    <th>Total Importe_Intereses</th>
+                    <th>Total Deuda_Actualizada</th>
+                </tr>
+                <tr>
+                    <td>{{ totals['Total_Importe_Deuda'] }}</td>
+                    <td>{{ totals['Total_Importe_Intereses'] }}</td>
+                    <td>{{ totals['Total_Deuda_Actualizada'] }}</td>
+                </tr>
+            </table>
+
+            <!-- Export Button -->
+            <div>
+                <button id="exportButton" onclick="exportToExcel()">Exportar a hoja de cálculo. Editar con LibreOffice Calc</button>
+            </div>
+        {% endif %}
+
+        <!-- Tasa Data Display -->
+        {% if tasa_data %}
+            <h2>Datos del Archivo Tasas.xlsx (tasa expresada en tanto por uno)</h2>
+            <table>
+                <tr>
+                    <th>F_Desde</th>
+                    <th>F_Hasta_Inc.</th>
+                    <th>Tasa</th>
+                </tr>
+                {% for row in tasa_data %}
+                <tr>
+                    <td>{{ row['F_Desde'] }}</td>
+                    <td>{{ row['F_Hasta_Inc.'] }}</td>
+                    <td>{{ row['Tasa'] }}</td>
+                </tr>
+                {% endfor %}
+            </table>
+        {% endif %}
+
+        <!-- Like Button -->
+        <div>
+            <button id="likeButton" onclick="sendLike()">If this app has been useful to you, then I deserve a Like. That's all I wish from you ❤️</button>
+            <p id="likes">Likes: {{ likes }}</p>
+        </div>
+
+        <!-- Footer -->
+        <div class="footer">
+            <p>Contacto: <a href="mailto:vnatale52@gmail.com">Para comentarios, sugerencias, detección de errores, etc., envía un correo electrónico a Vincenzo Natale : vnatale52@gmail.com</a></p>
+            <p>MIT License - Copyright (c) 2025 Vincenzo Natale</p>
+        </div>
+    </div>
+
+    <script>
+        function sendLike() {
+            fetch('/like', { method: 'POST' })
+                .then(response => response.json())
+                .then(data => {
+                    document.getElementById('likes').innerText = 'Likes: ' + data.likes;
+                });
+        }
+
+        function exportToExcel() {
+            fetch('/export', { method: 'POST' })
+                .then(response => response.blob())
+                .then(blob => {
+                    const url = window.URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = 'Calculo_Intereses.xlsx';
+                    document.body.appendChild(a);
+                    a.click();
+                    window.URL.revokeObjectURL(url);
+                });
+        }
+
+        // Update file selection status for Tasas.xlsx
+        document.querySelector('input[name="tasa_file"]').addEventListener('change', function () {
+            document.getElementById('tasa_file_status').innerText = 'A file has been selected.';
+        });
+
+        // Update file selection status for Deuda.xlsx
+        document.querySelector('input[name="excel_file"]').addEventListener('change', function () {
+            document.getElementById('deuda_file_status').innerText = 'A file has been selected.';
+        });
+    </script>
+</body>
+</html>
