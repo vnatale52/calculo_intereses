@@ -251,7 +251,9 @@ html_template = """
         <!-- Step 2: Upload Tasa File -->
         <div>
             <h2>Paso 2: Carga el archivo Tasas.xlsx</h2>
-            <p>Los títulos de las 3 columnas y su formato, por ejemplo, deben ser : F_Desde 01-01-2025   ,  F_Hasta_Inc. 30-06-2025  ,  Tasa 0,035700 . La tasa debe estar expresada en tanto por uno para 30 días de plazo, el denominador utilizado es siempre 30 días y no hay capitalización de intereses.</p>
+            
+            <p> Los títulos de las 3 columnas deben ser necesariamente:  F_Desde  ,  F_Hasta_Inc. ,  Tasa    y en la fila subsiguiente deben colocarse los datos, por ejemplo, respectivamente, en el siguiente formato para cada columna:   01-01-2025   30-06-2025   0,035700   .La tasa debe estar expresada en tanto por uno para 30 días de plazo, el denominador utilizado es siempre 30 días y no hay capitalización de intereses.</p>
+            
             <form action="/upload_tasa" method="post" enctype="multipart/form-data">
                 <input type="file" name="tasa_file" accept=".xlsx" required>
                 <button type="submit">Cargar Archivo</button>
@@ -262,7 +264,8 @@ html_template = """
         <!-- Step 3: Upload Deuda File -->
         <div>
             <h2>Paso 3: Carga el archivo Deuda.xlsx</h2>
-            <p>Los títulos de las 3 columnas y su formato, por ejemplo, deben ser : Mes y Año 01-11-2022  ,  Fecha_Vto 16-12-2022  ,  Importe_Deuda 2845086,27  (sin puntos y con coma para decimales) </p>
+            <p> Los títulos de las 3 columnas deben ser necesariamente:  Mes y Año   ,  Fecha_Vto   ,  Importe_Deuda    y en la fila subsiguiente deben colocarse los datos, por ejemplo, respectivamente, en el siguiente formato para cada columna:  01-11-2022  16-12-2022  2845086,27 (sin puntos y utilizando coma para decimales) </p>
+                        
             <form action="/process" method="post" enctype="multipart/form-data">
                 <input type="file" name="excel_file" accept=".xlsx" required>
                 <button type="submit">Cargar Archivo</button>
