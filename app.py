@@ -350,7 +350,7 @@ html_template = """
                 {% for row in tasa_data %}
                 <tr>
                     <td>{{ row['F_Desde'] }}</td>
-                    <td>{{ row['F_Hasta_Inc'] }}</td>
+                    <td>{{ row['F_Hasta_Inc.'] }}</td>
                     <td>{{ row['Tasa'] }}</td>
                 </tr>
                 {% endfor %}
