@@ -9,16 +9,16 @@ import os
 import sqlite3
 from io import BytesIO
 
-# Initialize the Flask application
+#   Initialize the Flask application
 app = Flask(__name__)
 
-# Set a secret key for session management
+#    Set a secret key for session management
 app.secret_key = os.getenv('SECRET_KEY', '9e9b5f8e7a2c4d1e6f8a9b0c3d2eff4')
 
 # Configure logging
 logging.basicConfig(level=logging.DEBUG)
 
-# Database configuration
+#   Database configuration
 DATABASE = 'likes.db'
 
 def get_db():
