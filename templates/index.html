@@ -15,10 +15,10 @@
         <!-- Step 1: Set Calculation Date -->
         <div>
             <h2>Paso 1: Ingresa la Fecha hasta la cual (inclusive) los intereses serán calculados.</h2>
-            <form action="/set_date" method="post">
+            <form id="dateForm" action="/set_date" method="post">
                 <label for="calc_date">Fecha de Cálculo:</label>
-                <input type="date" name="calc_date" required>
-                <button type="submit">Establecer Fecha de Cálculo</button>
+                <input type="date" name="calc_date" id="calc_date" required onchange="document.getElementById('dateForm').submit(); document.getElementById('date_status').innerText = 'A date has been selected.';">
+                <p id="date_status">{{ date_status }}</p> <!-- Mensaje de estado de la fecha -->
             </form>
         </div>
 
@@ -29,9 +29,8 @@
             
             <center><img src="{{ 'static/estructura_archivos.JPG' }}" alt="Imagen estructura archivos" width="345" height="60"> </center>
                         
-            <form action="/upload_tasa" method="post" enctype="multipart/form-data">
-                <input type="file" name="tasa_file" accept=".xlsx" required>
-                <button type="submit">Cargar Archivo</button>
+            <form id="tasaForm" action="/upload_tasa" method="post" enctype="multipart/form-data">
+                <input type="file" name="tasa_file" id="tasa_file" accept=".xlsx" required onchange="document.getElementById('tasaForm').submit();">
             </form>
             <p id="tasa_file_status">{{ tasa_file_status }}</p>
         </div>
@@ -40,9 +39,8 @@
         <div>
             <h2>Paso 3: Carga el archivo Deuda.xlsx</h2>
             <p> Los títulos de las 3 columnas deben ser necesariamente:  Mes y Año  ,  Fecha_Vto  ,  Importe_Deuda   y en la fila subsiguiente deben colocarse los datos como se indica en la imagen adjunta más arriba (sin puntos y utilizando coma para decimales) </p>
-            <form action="/process" method="post" enctype="multipart/form-data">
-                <input type="file" name="excel_file" accept=".xlsx" required>
-                <button type="submit">Cargar Archivo</button>
+            <form id="deudaForm" action="/process" method="post" enctype="multipart/form-data">
+                <input type="file" name="excel_file" id="excel_file" accept=".xlsx" required onchange="document.getElementById('deudaForm').submit();">
             </form>
             <p id="deuda_file_status">{{ deuda_file_status }}</p>
         </div>
@@ -126,9 +124,6 @@
                 </tr>
                 {% for row in tasa_data %}
                 <tr>
-                    <!-- <td>{{ row['F_Desde'] }}</td>       -->
-                    <!-- <td>{{ row['F_Hasta_Inc.'] }}</td>  -->
-                    <!-- <td>{{ row['Tasa'] }}</td>          -->
                     <td>{{ row['F_Desde'].strftime('%d-%m-%Y') }}</td>
                     <td>{{ row['F_Hasta_Inc.'].strftime('%d-%m-%Y') }}</td>
                     <td>{{ "{:,.4f}".format(row['Tasa']).replace(".", ",") }}</td>
