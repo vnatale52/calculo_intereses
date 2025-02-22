@@ -78,6 +78,7 @@ def home():
     totals = session.get('totals', None)
     calc_date = session.get('calc_date', None)
     tasa_data = session.get('tasa_data', None)
+    date_status = session.get('date_status', ' ')  # Obtener el estado de la fecha
 
     # File selection status
     tasa_file_status = session.get('tasa_file_status', ' ')     # colocado ' '  en lugar de "File selected"
@@ -93,7 +94,8 @@ def home():
         calc_date=calc_date,
         tasa_file_status=tasa_file_status,
         deuda_file_status=deuda_file_status,
-        tasa_data=tasa_data
+        tasa_data=tasa_data,
+        date_status=date_status  # Pasar el estado de la fecha a la plantilla
     )
 
 # Route to handle file upload for tasa data
@@ -131,15 +133,16 @@ def set_date():
     calc_date = request.form.get("calc_date")
     if not calc_date:
         flash("No se proporcionó ninguna fecha.", "error")
-        return redirect(url_for('home'))  # Redirect to home if no date is provided
+        return redirect(url_for('home'))
 
     try:
         calc_date_global = datetime.strptime(calc_date, "%Y-%m-%d")
         flash(f"Fecha de cálculo establecida: {calc_date_global.strftime('%d-%m-%Y')}", "success")
-        return redirect(url_for('home'))  # Redirect to home after setting the date
+        session['date_status'] = 'A date has been selected.'  # Actualiza el estado de la fecha
+        return redirect(url_for('home'))  # Redirige a la página principal
     except ValueError:
         flash("Formato de fecha no válido.", "error")
-        return redirect(url_for('home'))  # Redirect to home if the date format is invalid
+        return redirect(url_for('home'))
 
 # Route to process the uploaded debt file
 @app.route("/process", methods=["POST"])
@@ -277,16 +280,27 @@ def export_to_excel():
 
         # Create a BytesIO buffer to store the Excel file
         output = BytesIO()
+
+        # Use pd.ExcelWriter to write multiple sheets
         with pd.ExcelWriter(output, engine='xlsxwriter') as writer:
             df_data.to_excel(writer, sheet_name='Calculo_Intereses', index=False)
             df_subtotals.to_excel(writer, sheet_name='Subtotales', index=False)
             df_totals.to_excel(writer, sheet_name='Totales', index=False)
             df_tasa.to_excel(writer, sheet_name='Tasas', index=False)
 
+            # Save the writer and close it
+            writer.save()
+
+        # Seek to the beginning of the stream
         output.seek(0)
 
         # Return the Excel file as a response
-        return send_file(output, as_attachment=True, download_name='Calculo_Intereses.xlsx', mimetype='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+        return send_file(
+            output,
+            as_attachment=True,
+            download_name='Calculo_Intereses.xlsx',
+            mimetype='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+        )
     except Exception as e:
         logging.error(f"Error exporting to Excel: {str(e)}")
         flash(f"Error al exportar a Excel: {str(e)}", "error")
