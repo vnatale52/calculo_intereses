@@ -255,6 +255,7 @@ def like():
     return jsonify({"likes": likes})
 
 
+
 # Route to export data to Excel
 @app.route("/export", methods=["POST"])
 def export_to_excel():
@@ -264,8 +265,8 @@ def export_to_excel():
         subtotals = session.get('subtotals', None)
         totals = session.get('totals', None)
         tasa_data = session.get('tasa_data', None)
-        extra_columns = session.get('extra_columns', [])  # Obtener las columnas adicionales de la sesión
-        calc_date = session.get('calc_date', 'Fecha no disponible')  # Obtener la fecha de cálculo de la sesión
+        extra_columns = session.get('extra_columns', [])  # Get additional columns from the session
+        calc_date = session.get('calc_date', 'Fecha no disponible')  # Get calculation date from the session
 
         if not data or not subtotals or not totals or not tasa_data:
             return jsonify({"success": False, "message": "No hay datos para exportar."})
@@ -287,35 +288,32 @@ def export_to_excel():
         if 'F_Hasta_Inc.' in df_tasa.columns:
             df_tasa['F_Hasta_Inc.'] = pd.to_datetime(df_tasa['F_Hasta_Inc.']).dt.tz_localize(None)
 
-        # Definir el orden de las columnas para la hoja "Calculo_Intereses"
-        column_order = ['Mes y Año', 'Fecha_Vto', 'Importe_Deuda']  # Columnas fijas
-        column_order.extend(extra_columns)  # Agregar las columnas adicionales
-        column_order.extend(['Importe_Intereses', 'Deuda_Actualizada'])  # Columnas finales
+        # Define the column order for the "Calculo_Intereses" sheet
+        column_order = ['Mes y Año', 'Fecha_Vto', 'Importe_Deuda']  # Fixed columns
+        column_order.extend(extra_columns)  # Add additional columns
+        column_order.extend(['Importe_Intereses', 'Deuda_Actualizada'])  # Final columns
 
-        # Reordenar las columnas en df_data según el orden definido
+        # Reorder columns in df_data according to the defined order
         df_data = df_data[column_order]
 
         # Create a BytesIO buffer to store the Excel file
         output = BytesIO()
 
-        # Use pd.ExcelWriter to write multiple sheets
-        with pd.ExcelWriter(output, engine='xlsxwriter') as writer:
-            # Función para agregar la fecha de cálculo en la primera fila
+        # Use pd.ExcelWriter to write multiple sheets with openpyxl
+        with pd.ExcelWriter(output, engine='openpyxl') as writer:
+            # Function to add the calculation date in the first row
             def add_calc_date(sheet_name, df):
-                # Crear un nuevo DataFrame con la fecha de cálculo en la primera fila
+                # Create a new DataFrame with the calculation date in the first row
                 calc_date_df = pd.DataFrame([f"Fecha de Cálculo: {calc_date}"])
                 calc_date_df.to_excel(writer, sheet_name=sheet_name, index=False, header=False, startrow=0)
-                # Escribir el DataFrame original debajo de la fecha de cálculo
+                # Write the original DataFrame below the calculation date
                 df.to_excel(writer, sheet_name=sheet_name, index=False, startrow=1)
 
-            # Exportar cada hoja con la fecha de cálculo en la primera fila
+            # Export each sheet with the calculation date in the first row
             add_calc_date('Calculo_Intereses', df_data)
             add_calc_date('Subtotales', df_subtotals)
             add_calc_date('Totales', df_totals)
             add_calc_date('Tasas', df_tasa)
-
-            # Save the writer and close it
-            writer.close()
 
         # Seek to the beginning of the stream
         output.seek(0)
