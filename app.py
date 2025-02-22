@@ -102,10 +102,9 @@ def home():
 @app.route("/upload_tasa", methods=["POST"])
 def upload_tasa_file():
     global uploaded_tasa
-    file = request.files["tasa_file"]
+    file = request.files.get("tasa_file")
     if not file:
-        flash("No se subió ningún archivo.", "error")
-        return redirect(url_for('home'))  # Redirect to home if no file is uploaded
+        return jsonify({"success": False, "message": "No se subió ningún archivo."})
 
     try:
         df_tasa = pd.read_excel(file)
@@ -117,14 +116,12 @@ def upload_tasa_file():
         df_tasa["F_Hasta_Inc."] = pd.to_datetime(df_tasa["F_Hasta_Inc."], format="%d-%m-%Y", errors="coerce")
 
         uploaded_tasa = df_tasa
-        flash("Archivo de tasas cargado exitosamente.", "success")
         session['tasa_file_status'] = 'A file has been selected.'  # Update file selection status
         session['tasa_data'] = df_tasa.to_dict(orient="records")  # Store tasa data in session
-        return redirect(url_for('home'))  # Redirect to home after successful upload
+        return jsonify({"success": True, "message": "Archivo de tasas cargado exitosamente."})
     except Exception as e:
         logging.error(f"Error processing tasa file: {str(e)}")
-        flash(f"Error al procesar el archivo: {str(e)}", "error")
-        return redirect(url_for('home'))  # Redirect to home if there's an error
+        return jsonify({"success": False, "message": f"Error al procesar el archivo: {str(e)}"})
 
 # Route to set the calculation date
 @app.route("/set_date", methods=["POST"])
@@ -132,35 +129,37 @@ def set_date():
     global calc_date_global
     calc_date = request.form.get("calc_date")
     if not calc_date:
-        flash("No se proporcionó ninguna fecha.", "error")
-        return redirect(url_for('home'))
+        return jsonify({"success": False, "message": "No se proporcionó ninguna fecha."})
 
     try:
+        # Parse the input date (which is in YYYY-MM-DD format)
         calc_date_global = datetime.strptime(calc_date, "%Y-%m-%d")
-        flash(f"Fecha de cálculo establecida: {calc_date_global.strftime('%d-%m-%Y')}", "success")
-        session['date_status'] = 'A date has been selected.'  # Actualiza el estado de la fecha
-        return redirect(url_for('home'))  # Redirige a la página principal
+        
+        # Format the date as dd-mm-yyyy
+        formatted_date = calc_date_global.strftime("%d-%m-%Y")
+        
+        # Store the formatted date in the session
+        session['date_status'] = 'A date has been selected.'
+        session['calc_date'] = formatted_date  # Store the date in dd-mm-yyyy format
+        
+        return jsonify({"success": True, "message": f"Fecha de cálculo establecida: {formatted_date}"})
     except ValueError:
-        flash("Formato de fecha no válido.", "error")
-        return redirect(url_for('home'))
+        return jsonify({"success": False, "message": "Formato de fecha no válido."})
 
 # Route to process the uploaded debt file
 @app.route("/process", methods=["POST"])
 def process_file():
     global uploaded_tasa, calc_date_global
-    file = request.files["excel_file"]
+    file = request.files.get("excel_file")
 
     if not file:
-        flash("No se cargó ningún archivo.", "error")
-        return redirect(url_for('home'))  # Redirect to home if no file is uploaded
+        return jsonify({"success": False, "message": "No se cargó ningún archivo."})
 
     if uploaded_tasa is None:
-        flash("No se ha cargado el archivo Tasa.xlsx.", "error")
-        return redirect(url_for('home'))  # Redirect to home if tasa file is not uploaded
+        return jsonify({"success": False, "message": "No se ha cargado el archivo Tasa.xlsx."})
 
     if calc_date_global is None:
-        flash("No se ha establecido la fecha de cálculo.", "error")
-        return redirect(url_for('home'))  # Redirect to home if calculation date is not set
+        return jsonify({"success": False, "message": "No se ha establecido la fecha de cálculo."})
 
     try:
         df = pd.read_excel(file)
@@ -170,8 +169,7 @@ def process_file():
 
         df["Fecha_Vto"] = pd.to_datetime(df["Fecha_Vto"], format="%d-%m-%Y", errors="coerce")
         if df["Fecha_Vto"].isnull().any():
-            flash("Algunas fechas de vencimiento no son válidas o están ausentes.", "error")
-            return redirect(url_for('home'))  # Redirect to home if there are invalid dates
+            return jsonify({"success": False, "message": "Algunas fechas de vencimiento no son válidas o están ausentes."})
 
         def calcular_dias_transcurridos(row, tasa_row):
             f_desde = tasa_row["F_Desde"]
@@ -238,12 +236,10 @@ def process_file():
         session['calc_date'] = calc_date_global.strftime("%d-%m-%Y")
         session['deuda_file_status'] = 'A file has been selected.'  # Update file selection status
 
-        flash("Cálculo realizado exitosamente.", "success")
-        return redirect(url_for('home'))  # Redirect to home after successful processing
+        return jsonify({"success": True, "message": "Cálculo realizado exitosamente."})
     except Exception as e:
         logging.error(f"Error processing file: {str(e)}")
-        flash(f"Error al procesar el archivo: {str(e)}", "error")
-        return redirect(url_for('home'))  # Redirect to home if there's an error
+        return jsonify({"success": False, "message": f"Error al procesar el archivo: {str(e)}"})
 
 # Route to handle likes
 @app.route("/like", methods=["POST"])
@@ -269,8 +265,7 @@ def export_to_excel():
         tasa_data = session.get('tasa_data', None)
 
         if not data or not subtotals or not totals or not tasa_data:
-            flash("No hay datos para exportar.", "error")
-            return redirect(url_for('home'))
+            return jsonify({"success": False, "message": "No hay datos para exportar."})
 
         # Convert session data back to DataFrames
         df_data = pd.DataFrame(data)
@@ -289,7 +284,7 @@ def export_to_excel():
             df_tasa.to_excel(writer, sheet_name='Tasas', index=False)
 
             # Save the writer and close it
-            writer.save()
+            writer.close()    # corregido writer.save(), daba error
 
         # Seek to the beginning of the stream
         output.seek(0)
@@ -303,8 +298,8 @@ def export_to_excel():
         )
     except Exception as e:
         logging.error(f"Error exporting to Excel: {str(e)}")
-        flash(f"Error al exportar a Excel: {str(e)}", "error")
-        return redirect(url_for('home'))
+        return jsonify({"success": False, "message": f"Error al exportar a Excel: {str(e)}"})
+
 
 # Run the application
 if __name__ == "__main__":
