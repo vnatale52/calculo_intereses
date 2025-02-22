@@ -126,9 +126,12 @@
                 </tr>
                 {% for row in tasa_data %}
                 <tr>
-                    <td>{{ row['F_Desde'] }}</td>
-                    <td>{{ row['F_Hasta_Inc.'] }}</td>
-                    <td>{{ row['Tasa'] }}</td>
+                    <!-- <td>{{ row['F_Desde'] }}</td>       -->
+                    <!-- <td>{{ row['F_Hasta_Inc.'] }}</td>  -->
+                    <!-- <td>{{ row['Tasa'] }}</td>          -->
+                    <td>{{ row['F_Desde'].strftime('%d-%m-%Y') }}</td>
+                    <td>{{ row['F_Hasta_Inc.'].strftime('%d-%m-%Y') }}</td>
+                    <td>{{ "{:,.4f}".format(row['Tasa']).replace(".", ",") }}</td>
                 </tr>
                 {% endfor %}
             </table>
