@@ -111,7 +111,7 @@ tr:hover {
 
 /* File Status Messages */
 #tasa_file_status, #deuda_file_status, #date_status {
-    font-size: 1rem; /* Reduced font size */
+    font-size: 1.2rem; /* Reduced font size */
     color: #27ae60;
     margin-top: 5px; /* Reduced margin */
 }
