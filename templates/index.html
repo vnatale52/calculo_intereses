@@ -16,7 +16,8 @@
         <div>
             <h2>Paso 1: Ingresa la Fecha hasta la cual (inclusive) los intereses serán calculados.</h2>
             <form id="dateForm">
-                <label for="calc_date">Fecha de Cálculo:</label>
+                <label for="calc_date">Seleccionar Fecha de Cálculo desde el ícono del calendario (que se muestra en el formato mm-dd-yyyy):</label>
+                <!-- Use a date input with a calendar picker -->
                 <input type="date" name="calc_date" id="calc_date" required autofocus>
                 <p id="date_status">{{ date_status }}</p> <!-- Mensaje de estado de la fecha -->
             </form>
