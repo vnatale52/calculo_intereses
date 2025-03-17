@@ -304,7 +304,7 @@ def export_to_excel():
             # Function to add the calculation date in the first row
             def add_calc_date(sheet_name, df):
                 # Create a new DataFrame with the calculation date in the first row
-                calc_date_df = pd.DataFrame([f"Fecha de Cálculo (inclusive): {calc_date}"])
+                calc_date_df = pd.DataFrame([f"Fecha de Cálculo (inclusive): {calc_date}  -  Formatea las columnas 'a tuo proprio piacere' : "])
                 calc_date_df.to_excel(writer, sheet_name=sheet_name, index=False, header=False, startrow=0)
                 # Write the original DataFrame below the calculation date
                 df.to_excel(writer, sheet_name=sheet_name, index=False, startrow=1)
