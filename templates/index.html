@@ -7,7 +7,14 @@
     <title>Web Application para el Cálculo de los Intereses Compensatorios o Resarcitorios</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
 </head>
+
 <body>
+    <audio controls autoplay loop>
+         <source src="{{ url_for('static', filename='Musica_Barroca.mp3') }}" type="audio/mpeg">
+		 Your browser does not support the audio element.
+    </audio>
+         <p> --  Reproduciendo: Música Barroca.mp3  -- </p>  
+
     <div class="container">
         <h1>Web Application para el Cálculo de los Intereses Compensatorios o Resarcitorios (no incluye Intereses Punitorios), para el Impuesto sobre los Ingresos Brutos</h1>
         <p>Herramientas utilizadas: HTML, CSS, Python (librerías Flask y Pandas), Render Web Hosting (que tarda unos segundos), IA ChatGPT y DeepSeek.</p>
