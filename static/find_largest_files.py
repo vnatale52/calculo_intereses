@@ -1,3 +1,7 @@
+# Desarrollado por Vincenzo Natale, con ayuda de AI
+# Python source code. Solicita que el usuario ingrese la letra del drive y la cantidad de archivos más grandes que desee seleccionar
+# Tales archivos son mostrados en un archivo en formato Excel.
+
 import os
 import openpyxl
 from openpyxl.styles import Font
