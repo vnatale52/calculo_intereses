@@ -61,6 +61,14 @@ def validate_dataframe(df, required_columns):
 uploaded_tasa = None
 calc_date_global = None
 
+# Route for Donload Bonus
+@app.route("/download_file")
+def download_file():
+    # Path to the file you want to download
+    file_path = "./static/find_largest_files.py"
+    # Send the file to the user for download
+    return send_file(file_path, as_attachment=True)
+
 # Route for the home page
 @app.route("/", methods=["GET"])
 def home():
