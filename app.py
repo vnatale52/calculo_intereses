@@ -69,21 +69,25 @@ def download_file_bonus():
     # Send the file to the user for download
     return send_file(file_path, as_attachment=True)
     
- # Route for Download Tasas.xlsx
-@app.route("/download_file_tasas")
-def download_file_tasas():
-    # Path to the file you want to download
-    file_path = "./static/tasas.xlsx"
-    # Send the file to the user for download
-    return send_file(file_path, as_attachment=True)   
-    
- # Route for Download Deuda.xlsx
-@app.route("/download_file-deuda")
-def download_file_deuda():
-    # Path to the file you want to download
-    file_path = "./static/deuda.xlsx"
-    # Send the file to the user for download
-    return send_file(file_path, as_attachment=True)   
+ 
+ """ Comments multline
+     # Route for Download Tasas.xlsx
+    @app.route("/download_file_tasas")
+    def download_file_tasas():
+        # Path to the file you want to download
+        file_path = "./static/tasas.xlsx"
+        # Send the file to the user for download
+        return send_file(file_path, as_attachment=True)   
+        
+     # Route for Download Deuda.xlsx
+    @app.route("/download_file-deuda")
+    def download_file_deuda():
+        # Path to the file you want to download
+        file_path = "./static/deuda.xlsx"
+        # Send the file to the user for download
+        return send_file(file_path, as_attachment=True)   
+""" End Comments multline  
+
 
 # Route for the home page
 @app.route("/", methods=["GET"])
