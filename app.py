@@ -79,7 +79,7 @@ def download_file_tasas():
         return send_file(file_path, as_attachment=True)   
         
      # Route for Download Deuda.xlsx
-@app.route("/download_file-deuda")
+@app.route("/download_file_deuda")
 def download_file_deuda():
         # Path to the file you want to download
         file_path = "./static/deuda.xlsx"
