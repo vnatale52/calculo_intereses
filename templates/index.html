@@ -14,12 +14,20 @@
          <source src="{{ url_for('static', filename='Música_Tibetana.ogg') }}" type="audio/mpeg">
 		 Your browser does not support the audio element.
     </audio>
-          <p> <b> --  Reproduciendo Música Tibetana  -- </b> </p> 
+          <p> <b> --  Reproduciendo Música Tibetana para elevar tu mente a un nivel superior -- </b> </p> 
       
-    <button onclick="window.location.href='{{ url_for('download_file') }}'">
-    <p> <b>Presiona este botón para descargar un Bonus File: código fuente en Python que genera un Archivo Excel listando los top N archivos más grandes en disco; se debe correr en Python, "find_largest_files.py" </b> </p> 
+    <button onclick="window.location.href='{{ url_for('download_file_bonus') }}'">
+    <p> <b> Presiona este botón para descargar un Bonus File: código fuente en Python que genera un Archivo Excel, que contiene los top N archivos más grandes en disco; se debe correr en Python, "find_largest_files.py" </b> </p> 
     </button>
     
+    <button onclick="window.location.href='{{ url_for('download_file_tasas') }}'">
+    <p> <b> Presiona este botón para descargar el archivo de Tasas.xlsx, para que puedas ver las tasas y actualizarlas, según corresponda y subirlo a esta misma App </b> </p> 
+    </button>
+    
+    <button onclick="window.location.href='{{ url_for('download_file_deuda') }}'">
+    <p> <b>  Presiona este botón para descargar el archivo Deuda.xlsx, para que lo puedas utilizar como ejemplo para generar tu propio archivo y subirlo a esta misma App </b> </p> 
+    </button>
+         
         <div class="container">
         <h1>Web Application para el Cálculo de los Intereses Compensatorios o Resarcitorios (no incluye Intereses Punitorios), para el Impuesto sobre los Ingresos Brutos</h1>
         <p>Herramientas utilizadas: HTML, CSS, Python (librerías Flask y Pandas), Render Web Hosting (que tarda unos segundos), IA ChatGPT y DeepSeek.</p>
