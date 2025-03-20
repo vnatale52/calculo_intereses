@@ -61,6 +61,7 @@ def validate_dataframe(df, required_columns):
 uploaded_tasa = None
 calc_date_global = None
 
+
 # Route for Download Bonus
 @app.route("/download_file_bonus")
 def download_file_bonus():
@@ -68,25 +69,14 @@ def download_file_bonus():
     file_path = "./static/find_largest_files.py"
     # Send the file to the user for download
     return send_file(file_path, as_attachment=True)
-    
- 
-# Route for Download Tasas.xlsx
-@app.route("/download_file_tasas")
-def download_file_tasas():
-        # Path to the file you want to download
-        file_path = "./static/tasas.xlsx"
-        # Send the file to the user for download
-        return send_file(file_path, as_attachment=True)   
-        
-     # Route for Download Deuda.xlsx
-@app.route("/download_file_deuda")
-def download_file_deuda():
-        # Path to the file you want to download
-        file_path = "./static/deuda.xlsx"
-        # Send the file to the user for download
-        return send_file(file_path, as_attachment=True)   
- 
 
+# Route for Download Tasas Y Deuda.xlsx en un único archivo
+@app.route("/download_file_tasas_y_deuda")
+def download_file_tasas():
+    # Path to the file you want to download
+    file_path = "./static/Tasas_y_Deuda.xlsx"
+    # Send the file to the user for download
+    return send_file(file_path, as_attachment=True) 
 
 # Route for the home page
 @app.route("/", methods=["GET"])
