@@ -1,6 +1,4 @@
-# Desarrollado por Vincenzo Natale, con ayuda de AI
-# Python source code. Solicita que el usuario ingrese la letra del drive y la cantidad de archivos más grandes que desee seleccionar
-# Tales archivos son mostrados en un archivo en formato Excel.
+# Bonus File: código fuente en Python que genera un Archivo Excel, que contiene los top N archivos más grandes en un drive de tu disco; se debe correr en Python. By Vincenzo Natale
 
 import os
 import openpyxl
