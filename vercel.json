@@ -1,28 +1,4 @@
-// my-flask-app/vercel.json
-{
-  "version": 2,
-  "builds": [
-    {
-      "src": "app.py",        // Your main Flask app file
-      "use": "@vercel/python", // The official Python builder
-      "config": {
-        "maxLambdaSize": "500mb", // Adjust if needed, default is 50mb, but sometimes smaller helps initial build
-         "runtime": "python3.13" // Specify Python version (e.g., 3.8, 3.9, 3.10, 3.11, 3.12) - Use one supported by Vercel and compatible with your code/libs
-       }
-    },
-    {
-      "src": "static/**",     // Serve files from the static directory
-      "use": "@vercel/static"
-    }
-  ],
-  "routes": [
-    {
-      "src": "/static/(.*)",     // Route requests for /static/* to the static build
-      "dest": "/static/$1"
-    },
-    {
-      "src": "/(.*)",           // Route all other requests to the Python app
-      "dest": "app.py"
-    }
-  ]
+ {
+"builds":	[{ "src": "app.py", "use": "@vercel/python" }],
+"routes":	[{ "src": "/(.*)", "dest": "app.py" }]
 }
