@@ -6,7 +6,7 @@ import pandas as pd
 from datetime import datetime
 import logging
 import os
-import sqlite3
+import sqlite4   #  sqlite3
 from io import BytesIO
 
 #   Initialize the Flask application
