@@ -17,7 +17,7 @@ pytz==2025.2
 requests==2.32.3
 setuptools==78.1.0
 six==1.17.0
-SQLite3-0611==0.0.1       #  SQLite , cuidado con la versión
+SQLite4==0.0.1       #  SQLite , cuidado con la versión
 tzdata==2025.2
 gunicorn==23.0.0      # quitado, da error
 urllib3==2.3.0
