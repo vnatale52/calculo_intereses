@@ -6,7 +6,7 @@ import pandas as pd
 from datetime import datetime
 import logging
 import os
-import SQLite3-0611   #  no funciona con sqlite3
+import SQLite4   #  no funciona con sqlite3
 from io import BytesIO
 
 #   Initialize the Flask application
@@ -24,7 +24,7 @@ DATABASE = 'likes.db'
 def get_db():
     db = getattr(g, '_database', None)
     if db is None:
-        db = g._database = SQLite3-0611.connect(DATABASE)
+        db = g._database = SQLite4.connect(DATABASE)
     return db
 
 def init_db():
