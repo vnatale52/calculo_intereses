@@ -1,12 +1,14 @@
 # MIT License  -  Copyright (c) 2025 Vincenzo Natale
 
+# Python 3.12.0 is the version installed for the testing
+
 # Import necessary libraries
 from flask import Flask, request, render_template, session, jsonify, flash, g, redirect, url_for, send_file
 import pandas as pd
 from datetime import datetime
 import logging
 import os
-import SQLite4   #  no funciona con sqlite3
+import sqlite3
 from io import BytesIO
 
 #   Initialize the Flask application
@@ -24,7 +26,7 @@ DATABASE = 'likes.db'
 def get_db():
     db = getattr(g, '_database', None)
     if db is None:
-        db = g._database = SQLite4.connect(DATABASE)
+        db = g._database = sqlite3.connect(DATABASE)
     return db
 
 def init_db():
