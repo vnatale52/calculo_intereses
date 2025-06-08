@@ -17,9 +17,4 @@
     }
   ],
   
-  "functions": {
-    "app.py": {
-      "includeFiles": "/likes.db"
-    }
-  }
 }
