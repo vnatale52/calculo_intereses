@@ -3,11 +3,7 @@
   "builds": [
     {
       "src": "app.py",
-      "use": "@vercel/python",
-      "config": {
-        "maxLambdaSize": "30mb",
-        "runtime": "python3.12"
-      }
+      "use": "@vercel/python"
     }
   ],
   "routes": [
@@ -16,5 +12,9 @@
       "dest": "app.py"
     }
   ],
-  
+  "functions": {
+    "app.py": {
+      "includeFiles": "likes.db"
+    }
+  }
 }
