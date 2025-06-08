@@ -351,6 +351,7 @@ def export_to_excel():
 
 
 
-# Run the application
+# Run the application  
+# Quitado DEBUG true,  colocado false
 if __name__ == "__main__":
-    app.run(debug=os.getenv('DEBUG', 'False').lower() == 'true')
+    app.run(debug=os.getenv('DEBUG', 'False').lower() == 'false')
