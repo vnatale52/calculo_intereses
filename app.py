@@ -318,8 +318,8 @@ def export_to_excel():
         # Create a BytesIO buffer to store the Excel file
         output = BytesIO()
 
-        # Use pd.ExcelWriter to write multiple sheets with openpyxl
-        with pd.ExcelWriter(output, engine='openpyxl') as writer:
+        # Use pd.ExcelWriter to write multiple sheets.  openpyxl sólo para lectura y usas xlsxwriter para escritura.Con esto, la app seguirá leyendo archivos Excel con openpyxl, pero la exportación usará xlsxwriter, evitando el bug de archivos vacíos en Render.
+        with pd.ExcelWriter(output, engine='xlsxwriter') as writer:
             # Function to add the calculation date in the first row
             def add_calc_date(sheet_name, df):
                 # Create a new DataFrame with the calculation date in the first row
@@ -333,6 +333,7 @@ def export_to_excel():
             add_calc_date('Subtotales', df_subtotals)
             add_calc_date('Totales', df_totals)
             add_calc_date('Tasas', df_tasa)
+            
 
         # Seek to the beginning of the stream
         output.seek(0)
