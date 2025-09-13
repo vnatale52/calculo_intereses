@@ -334,10 +334,15 @@ def export_to_excel():
             add_calc_date('Totales', df_totals)
             add_calc_date('Tasas', df_tasa)
             
+        
+            # 🔑 Guardar y cerrar manualmente
+            writer.close()
 
-        # Seek to the beginning of the stream
-        output.seek(0)
-
+            # Rebobinar antes de enviar # Seek to the beginning of the stream
+            output.seek(0)
+        
+    
+        
         # Return the Excel file as a response
         return send_file(
             output,
