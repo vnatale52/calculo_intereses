@@ -20,9 +20,9 @@
     </button>  
           
     <button onclick="window.location.href='{{ url_for('download_file_tasas') }}'"> 
-    <p> <b> Presiona este botón para descargar el archivo de Tasas_y_Deuda.xlsx, para que puedas ver - a manera de ejemplo - las tasas y la deuda y, a continuación, para que puedas actualizarlas, según corresponda y, finalmente, para subirlos - cada pestaña por separado - a esta misma App. También, incluye una muestra del cálculo de intereses realizado.  </b> </p> 
-    </button> 
-          
+    <p> <b> Presiona este botón para descargar el archivo de Tasas_y_Deuda.xlsx, para que puedas ver - a manera de ejemplo - las tasas y la deuda y, a continuación, para que puedas actualizarlas, según corresponda y, finalmente, para subirlos - cada pestaña por separado - a esta misma App. También, incluye una muestra del cálculo de intereses realizado. Se informa que tales tasas fueron copiadas desde el Consejo de la Magistratura de la Ciudad Autónoma de Buenos Aires,  "link https://consejo.jusbaires.gob.ar/servicios/calculo-de-interes/", opción "Intereses Resarcitorios art. 55 del Código Fiscal de la CABA (t.o. 2026)", las cuales tienen una precisión de sólo 2 dígitos decimales porcentuales. Tales tasas deben ser validadas por cada usuario de esta App. </b> </p> 
+    
+                 
     <div class="container">
         <h1>Web Application para el Cálculo de los Intereses Compensatorios o Resarcitorios (no incluye Intereses Punitorios), para el Impuesto sobre los Ingresos Brutos</h1>
         <p>Herramientas utilizadas: HTML, CSS, Python (librerías Flask y Pandas), Render Web Hosting (que tarda unos segundos), IA ChatGPT y DeepSeek - App mejorada el 12-09-2025.</p>
@@ -41,7 +41,7 @@
         <!-- Step 2: Upload Tasa File -->
         <div>
             <h2>Paso 2: Carga el archivo Tasas.xlsx</h2>
-            <p> Los títulos de las 3 columnas deben ser necesariamente:  F_Desde , F_Hasta_Inc. ,  Tasa  y en la fila subsiguiente deben colocarse los datos como se indica en la imagen adjunta; se recomienda bajar el archivo de Tasas_y_Deuda.xlsx. La tasa debe estar expresada en tanto por uno, para 30 días de plazo, el denominador utilizado es siempre 30 días y no hay capitalización de intereses.</p>
+            <p> Los títulos de las 3 columnas deben ser necesariamente:  F_Desde , F_Hasta_Inc. ,  Tasa  y en la fila subsiguiente deben colocarse los datos como se indica en la imagen adjunta; se recomienda bajar el archivo de Tasas_y_Deuda.xlsx. La tasa debe estar expresada en tanto por uno, para 30 días de plazo; el denominador utilizado es siempre 30 días y no hay capitalización de intereses. En este cálculo no se ha previsto ningún plazo de días de gracia, en el cual no se devenguen intereses.</p>
             
             <center><img src="{{ 'static/estructura_archivos.JPG' }}" alt="Imagen estructura archivos" width="345" height="60"> </center>
                         
